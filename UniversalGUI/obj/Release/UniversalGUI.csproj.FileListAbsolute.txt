@@ -1,0 +1,15 @@
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\bin\Release\UniversalGUI.exe.config
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\bin\Release\UniversalGUI.exe
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\bin\Release\UniversalGUI.pdb
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\MainWindow.g.cs
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\App.g.cs
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI_MarkupCompile.cache
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI_MarkupCompile.lref
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\MainWindow.baml
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI.g.resources
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI.Properties.Resources.resources
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI.csproj.GenerateResource.cache
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI.csproj.CoreCompileInputs.cache
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI.exe
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI.pdb
+E:\Code\VisualStudio\CSharp\UniversalGUI\UniversalGUI\obj\Release\UniversalGUI.csprojAssemblyReference.cache
