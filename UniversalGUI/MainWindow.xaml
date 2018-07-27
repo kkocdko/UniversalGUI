@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:UniversalGUI"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="UniversalGUI.MainWindow"
         mc:Ignorable="d"
-        Title="Universal GUI" Height="500" Width="700" MinWidth="550" MinHeight="425">
+        Title="Universal GUI" Height="500" Width="700" MinWidth="550" MinHeight="425" Closing="SaveIniConfig">
     <Window.Resources>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
@@ -266,9 +266,11 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
+
+
     <Grid Name="MainGrid">
-        <Button Name="StartTaskButton" Content="Start" HorizontalAlignment="Right" Height="50" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="100" FontSize="16" Click="StartTask" Style="{DynamicResource FlatButton}"/>
-        <ProgressBar Name="TaskProgressBar" HorizontalAlignment="Right" Height="5" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="100" BorderBrush="#0000" Foreground="DimGray" Visibility="Hidden"/>
+        <Button Name="StartTaskButton" Content="Start" HorizontalAlignment="Right" Height="50" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="100" FontSize="16" Click="StartTaskAsync" Style="{DynamicResource FlatButton}" Grid.ColumnSpan="2"/>
+        <ProgressBar Name="TaskProgressBar" HorizontalAlignment="Right" Height="5" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="100" BorderBrush="#0000" Foreground="DimGray" Visibility="Hidden" Grid.ColumnSpan="2"/>
         <GroupBox Header="Files list" Margin="20,20,270,250">
             <Grid>
                 <ListBox x:Name="FilesList" Margin="5" AllowDrop="True" Drop="FilesList_Drop" SelectionMode="Extended" DragOver="FilesList_DragOver"/>
@@ -279,7 +281,7 @@
                 </Grid>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Command parameters" Margin="20,0,270,20" Height="210" VerticalAlignment="Bottom">
+        <GroupBox Header="Command" Margin="20,0,270,20" Height="210" VerticalAlignment="Bottom">
             <Grid>
                 <TextBlock Height="20" Margin="5,5,5,0" Text="Application path:" VerticalAlignment="Top"/>
                 <TextBox x:Name="AppPath"  Height="20" Margin="5,25,24,0" VerticalAlignment="Top" Text="" PreviewDragOver="ApplicationPath_PreviewDragOver" PreviewDrop="ApplicationPath_PreviewDrop"/>
@@ -292,7 +294,7 @@
                 <TextBox x:Name="UserArgs" Margin="5,125,5,5" TextWrapping="Wrap"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Output setting" Margin="0,20,20,250" Width="230" HorizontalAlignment="Right">
+        <GroupBox Header="Output" Margin="0,20,20,250" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
             <Grid>
                 <TextBlock Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="Extension:" VerticalAlignment="Top" TextAlignment="Right" Width="100" HorizontalAlignment="Left"/>
                 <TextBox x:Name="OutputExtension" Height="20" Margin="110,5,5,0" Text="" VerticalAlignment="Top"/>
@@ -307,7 +309,7 @@
                 <TextBlock Height="20" Margin="5,80,5,0" TextWrapping="Wrap" Text="(Empty inputbox to disable)" VerticalAlignment="Top" TextAlignment="Right" Foreground="#FF707070" FontSize="10"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Process setting" Margin="0,0,20,100" VerticalAlignment="Bottom" Height="130" Width="230" HorizontalAlignment="Right">
+        <GroupBox Header="Process" Margin="0,0,20,100" VerticalAlignment="Bottom" Height="130" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
             <Grid>
                 <TextBlock Height="20" Margin="5,5,0,0" TextWrapping="Wrap" Text="Priority:" VerticalAlignment="Top" Width="100" TextAlignment="Right" HorizontalAlignment="Left"/>
                 <ComboBox x:Name="Priority" SelectedValuePath="Tag" Margin="110,5,5,0" VerticalAlignment="Top" Height="20" Style="{DynamicResource FlatComboBox}">

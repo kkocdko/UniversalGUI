@@ -62,6 +62,7 @@ public class IniManager
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
     /// <param name="value">Write value</param>
+    /// <param name="path">File full path</param>
     public static void Write(string section, string key, string value, string path)
     {
         WritePrivateProfileString(section, key, value, path);
@@ -70,9 +71,9 @@ public class IniManager
     /// <summary>
     /// Delete key
     /// </summary>
-    /// <param name="path">File path</param>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
+    /// <param name="path">File full path</param>
     public static void DeleteKey(string section, string key, string path)
     {
         WritePrivateProfileString(section, key, null, path); //写入
@@ -81,8 +82,8 @@ public class IniManager
     /// <summary>
     /// Delete section
     /// </summary>
-    /// <param name="path">File path</param>
     /// <param name="section">Section name</param>
+    /// <param name="path">File full path</param>
     public static void DeleteSection(string section, string path)
     {
         WritePrivateProfileString(section, null, null, path); //写入
@@ -91,7 +92,7 @@ public class IniManager
     /// <summary>
     /// Creat file
     /// </summary>
-    /// <param name="path">File path</param>
+    /// <param name="path">File full path</param>
     public static void CreatFile(string path)
     {
         if (!File.Exists(path))

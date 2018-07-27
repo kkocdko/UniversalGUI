@@ -47,6 +47,8 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 我使用`LibWebP-cwebp`将36张图片转换为WebP格式，使用`-m 6`以取得更好的压缩效果。
 
+* 测试版本：`0.7.1.1`
+
 * 测试平台：`i3-2310m 2核心 4逻辑处理器（超线程）`、`2G DDR3 1333 内存`。
 
 |-------------|未使用多线程|UniversalGUI-4线程|
@@ -60,10 +62,6 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 * 添加暂停功能，用挂起进程实现（可能有点困难，容易出现进程死锁）（已放弃）。
 
-* 添加保存设置到ini文件的功能（Doing）。
-
 ### Bugs
-
-* 进度条指示不精准，特别是在多线程情况下。
 
 * Combo Box只有“收起”时才能看到Pressed效果。

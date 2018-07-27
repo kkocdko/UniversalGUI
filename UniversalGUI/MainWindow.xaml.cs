@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,37 +21,28 @@ namespace UniversalGUI
     {
         private string DefaultTitle;
 
+        private string IniFile = Environment.CurrentDirectory + "\\UniversalGUI.ini";
+        
         Config config = new Config();
 
         public MainWindow()
         {
             InitializeComponent();
-            
+
             DefaultTitle = Title;
+            ImputIniConfig();
             StartMonitorAsync();
         }
 
-        public void Tetete() //Some methods for text
+        public void Tetete() //Method for text
         {
-
+            Console.WriteLine(config.FilesSum);
             //MessageBox.Show(myw.ParametersTemplet.Text);
 
             //var jfiodsjf = Dispatcher.Invoke(() => ParametersTemplet.Text);
-
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                //MessageBox.Show();
-                StartTask(null, null);
-            }));
-
-
-
-            //var asApplicationPath = this.ApplicationPath.Text;
-
-            //MessageBox.Show(SummarizeParameters(@"C: \Users\kkocdko\Desktop\传文件提示.txt"));
         }
 
-        public async void StartTask()
+        public async void StartTaskAsync()
         {
             //Change UI
             MainGrid.IsEnabled = false;
@@ -60,7 +52,7 @@ namespace UniversalGUI
 
             //Collect config on UI
             SumConfig();
-            bool settingRight = CheckSetting();
+            bool settingRight = CheckConfig();
             int filesNum = config.FilesList.Count;
 
             //Run on backgrount thread,avoid UI have been lock
@@ -74,7 +66,7 @@ namespace UniversalGUI
                     {
                         tasks[i] = NewThreadAsync();
                     }
-                    foreach(var task in tasks)
+                    foreach (var task in tasks)
                     {
                         task.Wait();
                     }
@@ -105,19 +97,71 @@ namespace UniversalGUI
             while (config.FilesList.Count > 0)
             {
                 string args = SumArgs(
-                    config.ArgsTemplet,
-                    config.FilesList.First.Value, //传入链表中第一个文件
-                    config.UserArgs,
-                    config.OutputSuffix,
-                    config.OutputExtension,
-                    config.OutputFloder);
+                    argsTemplet: config.ArgsTemplet,
+                    inputFile: config.FilesList.First.Value, //链表中第一个文件
+                    userArgs: config.UserArgs,
+                    outputSuffix: config.OutputSuffix,
+                    outputExtension: config.OutputExtension,
+                    outputFloder: config.OutputFloder);
                 config.FilesList.RemoveFirst(); //弹出链表中第一个文件
                 await Task.Run(() =>
                 {
-                    NewProcess(config.AppPath, args);
-                    SetProgress(((double)config.FilesSum - config.FilesList.Count) / config.FilesSum);
+                    NewProcess(
+                        appPath: config.AppPath,
+                        args: args,
+                        windowStyle: config.WindowStyle,
+                        priority: config.Priority);
                 });
+                SetProgress(((double)config.FilesSum - config.FilesList.Count) / config.FilesSum);
+
             }
+        }
+
+        private void NewProcess(string appPath, string args, int windowStyle, int priority)
+        {
+            var process = new Process();
+            process.StartInfo.FileName = appPath;
+            process.StartInfo.Arguments = args;
+            switch (windowStyle)
+            {
+                case 0:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    break;
+                case 1:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
+                    break;
+                case 2:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    break;
+                case 3:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+                    break;
+                default:
+                    break;
+            }
+            process.Start();
+            switch (priority)
+            {
+                case 1:
+                    process.PriorityClass = ProcessPriorityClass.Idle;
+                    break;
+                case 2:
+                    process.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    break;
+                case 3:
+                    process.PriorityClass = ProcessPriorityClass.Normal;
+                    break;
+                case 4:
+                    process.PriorityClass = ProcessPriorityClass.AboveNormal;
+                    break;
+                case 5:
+                    process.PriorityClass = ProcessPriorityClass.High;
+                    break;
+                case 6:
+                    process.PriorityClass = ProcessPriorityClass.RealTime;
+                    break;
+            }
+            process.WaitForExit();
         }
 
         private void SumConfig()
@@ -127,7 +171,7 @@ namespace UniversalGUI
             {
                 foreach (var item in FilesList.Items)
                 {
-                    config.FilesList.AddLast(Convert.ToString(item)); //把文件压入链表底部
+                    config.FilesList.AddLast(Convert.ToString(item)); //把文件添加到链表底部
                 }
                 config.FilesSum = config.FilesList.Count;
                 config.AppPath = AppPath.Text;
@@ -217,61 +261,44 @@ namespace UniversalGUI
 
             return arguments;
         }
-        
-        private void NewProcess(string appPath, string args)
+
+        private void ImputIniConfig()
         {
-            var process = new Process();
-            process.StartInfo.FileName = appPath;
-            process.StartInfo.Arguments = args;
-            switch (config.WindowStyle)
+            if (File.Exists(IniFile))
             {
-                case 0:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    break;
-                case 1:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
-                    break;
-                case 2:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-                    break;
-                case 3:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
-                    break;
-                default:
-                    break;
+                AppPath.Text = IniManager.Read("Command", "AppPath", IniFile);
+                ArgsTemplet.Text = IniManager.Read("Command", "ArgsTemplet", IniFile);
+                UserArgs.Text = IniManager.Read("Command", "UserArgs", IniFile);
+                OutputExtension.Text = IniManager.Read("Output", "Extension", IniFile);
+                OutputSuffix.Text = IniManager.Read("Output", "Suffix", IniFile);
+                OutputFloder.Text = IniManager.Read("Output", "Floder", IniFile);
+                Priority.SelectedValue = IniManager.Read("Process", "Priority", IniFile);
+                ThreadNumber.SelectedValue = IniManager.Read("Process", "ThreadNumber", IniFile);
+                CUIWindowStyle.SelectedValue = IniManager.Read("Process", "WindowStyle", IniFile);
             }
-            process.Start();
-            /*
-            switch (config.Priority)
-            {
-                case 1:
-                    process.PriorityClass = ProcessPriorityClass.Idle;
-                    break;
-                case 2:
-                    process.PriorityClass = ProcessPriorityClass.BelowNormal;
-                    break;
-                case 3:
-                    process.PriorityClass = ProcessPriorityClass.Normal;
-                    break;
-                case 4:
-                    process.PriorityClass = ProcessPriorityClass.AboveNormal;
-                    break;
-                case 5:
-                    process.PriorityClass = ProcessPriorityClass.High;
-                    break;
-                case 6:
-                    process.PriorityClass = ProcessPriorityClass.RealTime;
-                    break;
-            }
-            */
-            process.WaitForExit();
+        }
+
+        private void SaveIniConfig()
+        {
+            IniManager.CreatFile(IniFile);
+            IniManager.Write("Command", "AppPath", AppPath.Text, IniFile);
+            IniManager.Write("Command", "ArgsTemplet", ArgsTemplet.Text, IniFile);
+            IniManager.Write("Command", "UserArgs", UserArgs.Text, IniFile);
+            IniManager.Write("Output", "Extension", OutputExtension.Text, IniFile);
+            IniManager.Write("Output", "Suffix", OutputSuffix.Text, IniFile);
+            IniManager.Write("Output", "Floder", OutputFloder.Text, IniFile);
+            IniManager.Write("Process", "Priority", Convert.ToString(Priority.SelectedValue), IniFile);
+            IniManager.Write("Process", "ThreadNumber", Convert.ToString(ThreadNumber.SelectedValue), IniFile);
+            IniManager.Write("Process", "WindowStyle", Convert.ToString(CUIWindowStyle.SelectedValue), IniFile);
         }
     }
 
     //About UI
     public partial class MainWindow : Window
     {
-        private void StartTask(object sender, RoutedEventArgs e) => StartTask();
+        private void SaveIniConfig(object sender, System.ComponentModel.CancelEventArgs e) => SaveIniConfig();
+
+        private void StartTaskAsync(object sender, RoutedEventArgs e) => StartTaskAsync();
 
         private void SetProgress(double multiple = -2)
         {
@@ -366,7 +393,7 @@ namespace UniversalGUI
                         usedMem = usedMem / 1024 / 1024;
                         usedMem = Math.Round(usedMem, 1);
                     }
-                    
+
                     Dispatcher.Invoke(() =>
                     {
                         MonitorForCPU.Text = cpuUseRatio + "%";
@@ -378,7 +405,7 @@ namespace UniversalGUI
             });
         }
 
-        private bool CheckSetting()
+        private bool CheckConfig()
         {
             if (FilesList.Items.Count == 0)
             {
@@ -508,4 +535,3 @@ namespace UniversalGUI
         public int WindowStyle;
     }
 }
-
