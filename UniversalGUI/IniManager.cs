@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -20,12 +21,12 @@ public class IniManager
     /// <returns></returns>
     [DllImport("kernel32")]
     private static extern int GetPrivateProfileString(
-        string lpAppName,
-        string lpKeyName,
-        string lpDefault,
-        StringBuilder lpReturnedString,
-        int nSize,
-        string lpFileName);
+        string section,
+        string key,
+        string value,
+        StringBuilder cache,
+        int cacheSize,
+        string path);
 
     /// <summary>
     /// Write value
@@ -37,35 +38,81 @@ public class IniManager
     /// <returns>0：error 1：success</returns>
     [DllImport("kernel32")]
     private static extern long WritePrivateProfileString(
-        string mpAppName,
-        string mpKeyName,
-        string mpDefault,
-        string mpFileName);
+        string section,
+        string key,
+        string value,
+        string path);
     #endregion
 
+    public string IniFile { get; private set; }
+
     /// <summary>
-    /// Read
+    /// IniManager constructor
     /// </summary>
-    /// <param name="section">Section name</param>
-    /// <param name="key">Key name</param>
-    /// <returns>读取值</returns>
-    public static string Read(string section, string key, string path)
+    /// <param name="path">Ini file's full path(Use full path!)</param>
+    public IniManager(string path)
     {
-        StringBuilder stringBuilder = new StringBuilder(1024); //定义一个最大长度为1024的可变字符串
-        GetPrivateProfileString(section, key, "", stringBuilder, 1024, path); //读取INI文件
-        return stringBuilder.ToString(); //返回键值
+        IniFile = path;
     }
 
     /// <summary>
-    /// Write
+    /// Read key
+    /// </summary>
+    /// <param name="section">Section name</param>
+    /// <param name="key">Key name</param>
+    /// <returns>Read value</returns>
+    public string Read(string section, string key)
+    {
+        StringBuilder strBuilder = new StringBuilder(1024);
+        GetPrivateProfileString(section, key, "", strBuilder, 1024, IniFile);
+        return strBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Write key
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
     /// <param name="value">Write value</param>
-    /// <param name="path">File full path</param>
-    public static void Write(string section, string key, string value, string path)
+    public void Write(string section, string key, string value)
     {
-        WritePrivateProfileString(section, key, value, path);
+        WritePrivateProfileString(section, key, value, IniFile);
+    }
+
+    /// <summary>
+    /// Write key
+    /// </summary>
+    /// <param name="section">Section name</param>
+    /// <param name="key">Key name</param>
+    /// <param name="value">Write value</param>
+    public void Write(string section, string key, double value)
+    {
+        string strValue = Convert.ToString(value);
+        Write(section, key, strValue);
+    }
+
+    /// <summary>
+    /// Write key
+    /// </summary>
+    /// <param name="section">Section name</param>
+    /// <param name="key">Key name</param>
+    /// <param name="value">Write value</param>
+    public void Write(string section, string key, object value)
+    {
+        string strValue = Convert.ToString(value);
+        Write(section, key, strValue);
+    }
+
+    /// <summary>
+    /// Write key
+    /// </summary>
+    /// <param name="section">Section name</param>
+    /// <param name="key">Key name</param>
+    /// <param name="value">Write value</param>
+    public void Write(string section, string key, bool value)
+    {
+        string strValue = Convert.ToString(value);
+        Write(section, key, strValue);
     }
 
     /// <summary>
@@ -73,33 +120,36 @@ public class IniManager
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
-    /// <param name="path">File full path</param>
-    public static void DeleteKey(string section, string key, string path)
+    public void Delete(string section, string key)
     {
-        WritePrivateProfileString(section, key, null, path); //写入
+        WritePrivateProfileString(section, key, null, IniFile);
     }
 
     /// <summary>
     /// Delete section
     /// </summary>
     /// <param name="section">Section name</param>
-    /// <param name="path">File full path</param>
-    public static void DeleteSection(string section, string path)
+    /// <param name="key">Key name</param>
+    public void Delete(string section)
     {
-        WritePrivateProfileString(section, null, null, path); //写入
+        WritePrivateProfileString(section, null, null, IniFile);
     }
 
     /// <summary>
     /// Creat file
     /// </summary>
-    /// <param name="path">File full path</param>
-    public static void CreatFile(string path)
+    public void CreatFile()
     {
-        if (!File.Exists(path))
+        string iniFilePath = Path.GetDirectoryName(IniFile);
+        if (Directory.Exists(iniFilePath))
         {
-            FileStream fs = File.Create(path);
+            var fs = File.Create(IniFile);
             fs.Close();
+        }
+        else
+        {
+            Directory.CreateDirectory(iniFilePath);
+            CreatFile();
         }
     }
 }
-

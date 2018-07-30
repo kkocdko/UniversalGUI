@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -16,51 +15,28 @@ namespace UniversalGUI
     /// MainWindow.xaml's Interactive logic
     /// </summary>
 
-    //Core function
+    //Core
     public partial class MainWindow : Window
     {
-        private string DefaultTitle;
-
-        private string IniFile = Environment.CurrentDirectory + "\\UniversalGUI.ini";
-        
-        Config config = new Config();
-
-        public MainWindow()
-        {
-            InitializeComponent();
-
-            DefaultTitle = Title;
-            ImputIniConfig();
-            StartMonitorAsync();
-        }
-
-        public void Tetete() //Method for text
-        {
-            Console.WriteLine(config.FilesSum);
-            //MessageBox.Show(myw.ParametersTemplet.Text);
-
-            //var jfiodsjf = Dispatcher.Invoke(() => ParametersTemplet.Text);
-        }
+        private Config config = new Config();
 
         public async void StartTaskAsync()
         {
             //Change UI
-            MainGrid.IsEnabled = false;
+            this.IsEnabled = false;
             StartTaskButton.IsEnabled = false;
             StartTaskButton.Content = "Running";
-            TaskProgressBar.Visibility = Visibility.Visible;
+            SetProgress(0);
 
             //Collect config on UI
             SumConfig();
-            bool settingRight = CheckConfig();
-            int filesNum = config.FilesList.Count;
+            bool settingLegal = CheckConfig();
 
-            //Run on backgrount thread,avoid UI have been lock
+            //Run on background thread
             await Task.Run(() =>
             {
-                if (settingRight == true)
+                if (settingLegal == true)
                 {
-                    SetProgress(0);
                     Task[] tasks = new Task[config.ThreadNumber];
                     for (int i = 0; i < tasks.Length; i++)
                     {
@@ -74,8 +50,8 @@ namespace UniversalGUI
             });
 
             //Change UI
-            MainGrid.IsEnabled = true;
-            if (settingRight == true)
+            this.IsEnabled = true;
+            if (settingLegal == true)
             {
                 StartTaskButton.Content = "Finished";
                 SetProgress(1);
@@ -89,14 +65,14 @@ namespace UniversalGUI
             StartTaskButton.IsEnabled = true;
             StartTaskButton.Content = "Start";
             TaskProgressBar.Visibility = Visibility.Hidden;
-            SetProgress(); //Clear progress
+            SetProgress(); //擦屁股
         }
 
-        private async Task NewThreadAsync()
+        public async Task NewThreadAsync()
         {
             while (config.FilesList.Count > 0)
             {
-                string args = SumArgs(
+                string sumAppArgs = SumAppArgs(
                     argsTemplet: config.ArgsTemplet,
                     inputFile: config.FilesList.First.Value, //链表中第一个文件
                     userArgs: config.UserArgs,
@@ -108,85 +84,19 @@ namespace UniversalGUI
                 {
                     NewProcess(
                         appPath: config.AppPath,
-                        args: args,
+                        appArgs: sumAppArgs,
                         windowStyle: config.WindowStyle,
                         priority: config.Priority);
                 });
-                SetProgress(((double)config.FilesSum - config.FilesList.Count) / config.FilesSum);
-
-            }
-        }
-
-        private void NewProcess(string appPath, string args, int windowStyle, int priority)
-        {
-            var process = new Process();
-            process.StartInfo.FileName = appPath;
-            process.StartInfo.Arguments = args;
-            switch (windowStyle)
-            {
-                case 0:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    break;
-                case 1:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
-                    break;
-                case 2:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-                    break;
-                case 3:
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
-                    break;
-                default:
-                    break;
-            }
-            process.Start();
-            switch (priority)
-            {
-                case 1:
-                    process.PriorityClass = ProcessPriorityClass.Idle;
-                    break;
-                case 2:
-                    process.PriorityClass = ProcessPriorityClass.BelowNormal;
-                    break;
-                case 3:
-                    process.PriorityClass = ProcessPriorityClass.Normal;
-                    break;
-                case 4:
-                    process.PriorityClass = ProcessPriorityClass.AboveNormal;
-                    break;
-                case 5:
-                    process.PriorityClass = ProcessPriorityClass.High;
-                    break;
-                case 6:
-                    process.PriorityClass = ProcessPriorityClass.RealTime;
-                    break;
-            }
-            process.WaitForExit();
-        }
-
-        private void SumConfig()
-        {
-            config = new Config(); //直接new一个，省的整天重置这重置那的
-            Dispatcher.Invoke(() =>
-            {
-                foreach (var item in FilesList.Items)
+                config.CompletedFileNum++;
+                Dispatcher.Invoke(() =>
                 {
-                    config.FilesList.AddLast(Convert.ToString(item)); //把文件添加到链表底部
-                }
-                config.FilesSum = config.FilesList.Count;
-                config.AppPath = AppPath.Text;
-                config.ArgsTemplet = ArgsTemplet.Text;
-                config.UserArgs = UserArgs.Text;
-                config.OutputSuffix = OutputSuffix.Text;
-                config.OutputExtension = OutputExtension.Text;
-                config.OutputFloder = OutputFloder.Text;
-                config.Priority = Convert.ToInt32(Priority.SelectedValue);
-                config.ThreadNumber = Convert.ToInt32(ThreadNumber.SelectedValue);
-                config.WindowStyle = Convert.ToInt32(CUIWindowStyle.SelectedValue);
-            });
+                    SetProgress((double)config.CompletedFileNum / config.FilesSum);
+                });
+            }
         }
 
-        private string SumArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
+        private string SumAppArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
             //去前后引号
             inputFile = new Regex("[(^\")(\"$)]").Replace(inputFile, "");
@@ -262,88 +172,142 @@ namespace UniversalGUI
             return arguments;
         }
 
-        private void ImputIniConfig()
+        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority)
         {
-            if (File.Exists(IniFile))
+            var process = new Process();
+            process.StartInfo.FileName = appPath;
+            process.StartInfo.Arguments = appArgs;
+            switch (windowStyle)
             {
-                AppPath.Text = IniManager.Read("Command", "AppPath", IniFile);
-                ArgsTemplet.Text = IniManager.Read("Command", "ArgsTemplet", IniFile);
-                UserArgs.Text = IniManager.Read("Command", "UserArgs", IniFile);
-                OutputExtension.Text = IniManager.Read("Output", "Extension", IniFile);
-                OutputSuffix.Text = IniManager.Read("Output", "Suffix", IniFile);
-                OutputFloder.Text = IniManager.Read("Output", "Floder", IniFile);
-                Priority.SelectedValue = IniManager.Read("Process", "Priority", IniFile);
-                ThreadNumber.SelectedValue = IniManager.Read("Process", "ThreadNumber", IniFile);
-                CUIWindowStyle.SelectedValue = IniManager.Read("Process", "WindowStyle", IniFile);
+                case 1:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    break;
+                case 2:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
+                    break;
+                case 3:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    break;
+                case 4:
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+                    break;
+                default:
+                    break;
             }
+            process.Start();
+            switch (priority)
+            {
+                case 1:
+                    process.PriorityClass = ProcessPriorityClass.Idle;
+                    break;
+                case 2:
+                    process.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    break;
+                case 3:
+                    process.PriorityClass = ProcessPriorityClass.Normal;
+                    break;
+                case 4:
+                    process.PriorityClass = ProcessPriorityClass.AboveNormal;
+                    break;
+                case 5:
+                    process.PriorityClass = ProcessPriorityClass.High;
+                    break;
+                case 6:
+                    process.PriorityClass = ProcessPriorityClass.RealTime;
+                    break;
+            }
+            process.WaitForExit();
         }
 
-        private void SaveIniConfig()
+        private void SumConfig()
         {
-            IniManager.CreatFile(IniFile);
-            IniManager.Write("Command", "AppPath", AppPath.Text, IniFile);
-            IniManager.Write("Command", "ArgsTemplet", ArgsTemplet.Text, IniFile);
-            IniManager.Write("Command", "UserArgs", UserArgs.Text, IniFile);
-            IniManager.Write("Output", "Extension", OutputExtension.Text, IniFile);
-            IniManager.Write("Output", "Suffix", OutputSuffix.Text, IniFile);
-            IniManager.Write("Output", "Floder", OutputFloder.Text, IniFile);
-            IniManager.Write("Process", "Priority", Convert.ToString(Priority.SelectedValue), IniFile);
-            IniManager.Write("Process", "ThreadNumber", Convert.ToString(ThreadNumber.SelectedValue), IniFile);
-            IniManager.Write("Process", "WindowStyle", Convert.ToString(CUIWindowStyle.SelectedValue), IniFile);
+            config = new Config(); //直接new一个，省的整天重置这重置那的
+            Dispatcher.Invoke(() =>
+            {
+                foreach (var item in FilesList.Items)
+                {
+                    config.FilesList.AddLast(Convert.ToString(item)); //把文件添加到链表底部
+                }
+                config.FilesSum = FilesList.Items.Count;
+                config.AppPath = AppPath.Text;
+                config.ArgsTemplet = ArgsTemplet.Text;
+                config.UserArgs = UserArgs.Text;
+                config.OutputSuffix = OutputSuffix.Text;
+                config.OutputExtension = OutputExtension.Text;
+                config.OutputFloder = OutputFloder.Text;
+                config.Priority = Convert.ToUInt32(Priority.SelectedValue);
+                config.ThreadNumber = Convert.ToUInt32(ThreadNumber.SelectedValue);
+                config.WindowStyle = Convert.ToUInt32(CUIWindowStyle.SelectedValue);
+            });
+        }
+    }
+
+    //Start and Exit
+    public partial class MainWindow : Window
+    {
+        public MainWindow()
+        {
+            InitializeComponent();
+
+            DefaultTitle = this.Title;
+
+            IniConfigManager = new IniManager(GetIniConfigFile());
+            ImputIniConfig(IniConfigManager);
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            StartMonitorAsync();
+        }
+
+        private void MainWindow_WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SaveIniConfig(IniConfigManager);
         }
     }
 
     //About UI
     public partial class MainWindow : Window
     {
-        private void SaveIniConfig(object sender, System.ComponentModel.CancelEventArgs e) => SaveIniConfig();
+        private string DefaultTitle;
 
         private void StartTaskAsync(object sender, RoutedEventArgs e) => StartTaskAsync();
 
         private void SetProgress(double multiple = -2)
         {
-            Dispatcher.Invoke(() =>
+            if (multiple == -2) //重置
             {
-                //重置
-                if (multiple == -2)
-                {
-                    SetTitleSuffix();
-                    TaskProgressBar.Value = 0;
-                    TaskProgressBar.Foreground = new SolidColorBrush(Colors.DimGray);
-                    //TaskProgressBar.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF06B025"));
-                }
-
-                //错误警告
-                if (multiple == -1)
-                {
-                    SetTitleSuffix("Error");
-                    TaskProgressBar.Foreground = new SolidColorBrush(Colors.Red);
-                    TaskProgressBar.Value = 100;
-                }
-
-                //修改
-                if (multiple >= 0 && multiple <= 1)
-                {
-                    double percent = Math.Round(multiple * 100);
-                    SetTitleSuffix(percent + "%");
-                    TaskProgressBar.Value = percent;
-                }
-            });
+                SetTitleSuffix();
+                TaskProgressBar.Value = 0;
+                TaskProgressBar.Foreground = new SolidColorBrush(Colors.DimGray);
+                TaskProgressBar.Visibility = Visibility.Hidden;
+            }
+            else if (multiple == -1) //错误警告
+            {
+                SetTitleSuffix("Error");
+                TaskProgressBar.Foreground = new SolidColorBrush(Colors.Red);
+                TaskProgressBar.Value = 100;
+                TaskProgressBar.Visibility = Visibility.Visible;
+            }
+            else if (multiple >= 0 && multiple <= 1) //修改
+            {
+                double percent = Math.Round(multiple * 100);
+                SetTitleSuffix(percent + "%");
+                TaskProgressBar.Value = percent;
+                TaskProgressBar.Visibility = Visibility.Visible;
+            }
         }
 
         private void SetTitleSuffix(string suffix = "")
         {
-            Dispatcher.Invoke(() =>
+            if (suffix == "")
             {
-                if (suffix != "")
-                {
-                    Title = DefaultTitle + " [" + suffix + "]";
-                }
-                else
-                {
-                    Title = DefaultTitle;
-                }
-            });
+                Title = DefaultTitle;
+            }
+            else
+            {
+                Title = DefaultTitle + " [" + suffix + "]";
+            }
         }
 
         private async void StartMonitorAsync()
@@ -409,30 +373,38 @@ namespace UniversalGUI
         {
             if (FilesList.Items.Count == 0)
             {
-                MessageBox.Show(@"Please add file into fileslist.", "Error");
+                MessageBox.Show("Please add file into fileslist.", "Error");
                 return false;
             }
-            if (AppPath.Text == "")
+            else if (AppPath.Text == "")
             {
-                MessageBox.Show(@"Please input command application's path.", "Error");
+                MessageBox.Show("Please input command application's path.", "Error");
                 return false;
             }
-            if (ArgsTemplet.Text == "")
+            else if (ArgsTemplet.Text == "")
             {
-                MessageBox.Show(@"Please input parameters' templet.", "Error");
+                MessageBox.Show("Please input arguments' templet.", "Error");
                 return false;
             }
-            if (OutputFloder.Text == "" && OutputExtension.Text == "" && OutputSuffix.Text == "")
+            else if (OutputFloder.Text == "" && OutputExtension.Text == "" && OutputSuffix.Text == "")
             {
-                MessageBox.Show(@"If you want to output into source floder,in output extension and suffix, you need to fill in at least one.", "Error");
+                MessageBox.Show("If you want to output into source floder,in output extension and suffix, you need to fill in at least one.", "Error");
                 return false;
+            }
+            else if (CustomThreadNumberItem.IsSelected == true)
+            {
+                if (Convert.ToInt32(CustomThreadNumberItem.Tag) == 0 || CustomThreadNumberTextBox.Text == "")
+                {
+                    MessageBox.Show("Thread number is illegal.", "Error");
+                    return false;
+                }
             }
             return true;
         }
 
         private void AddFilesListItems(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog()
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog()
             {
                 DereferenceLinks = true,
                 Multiselect = true,
@@ -482,6 +454,19 @@ namespace UniversalGUI
             }
         }
 
+        private void SwitchApplicationPath(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new Microsoft.Win32.OpenFileDialog()
+            {
+                Filter = "Executable program (*.exe)|*.exe|Dynamic link library (*.dll)|*.dll",
+                DereferenceLinks = true,
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                AppPath.Text = openFileDialog.FileName;
+            }
+        }
+
         private void ApplicationPath_PreviewDragOver(object sender, DragEventArgs e)
         {
             e.Effects = DragDropEffects.Copy;
@@ -494,19 +479,6 @@ namespace UniversalGUI
             AppPath.Text = dropFiles[0];
         }
 
-        private void SwitchApplicationPath(object sender, RoutedEventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog()
-            {
-                Filter = "Executable program (*.exe)|*.exe|Dynamic link library (*.dll)|*.dll",
-                DereferenceLinks = true,
-            };
-            if (openFileDialog.ShowDialog() == true)
-            {
-                AppPath.Text = openFileDialog.FileName;
-            }
-        }
-
         private void SwitchOutputFloder(object sender, RoutedEventArgs e)
         {
             var folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
@@ -515,13 +487,182 @@ namespace UniversalGUI
                 OutputFloder.Text = folderBrowserDialog.SelectedPath;
             }
         }
+
+        private void OutputFloder_PreviewDragOver(object sender, DragEventArgs e)
+        {
+            e.Effects = DragDropEffects.Copy;
+            e.Handled = true;
+        }
+
+        private void OutputFloder_PreviewDrop(object sender, DragEventArgs e)
+        {
+            string[] dropFloders = (string[])e.Data.GetData(DataFormats.FileDrop);
+            OutputFloder.Text = dropFloders[0];
+        }
+
+        private void OutputExtension_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            OutputExtension.Focus();
+            e.Handled = true;
+        }
+
+        private void OutputExtension_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OutputExtension.SelectAll();
+        }
+
+        private void OutputSuffix_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            OutputSuffix.Focus();
+            e.Handled = true;
+        }
+
+        private void OutputSuffix_GotFocus(object sender, RoutedEventArgs e)
+        {
+            OutputSuffix.SelectAll();
+        }
+
+        private void CustomThreadNumberTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            uint threadNumber = 0;
+            try
+            {
+                threadNumber = Convert.ToUInt32(CustomThreadNumberTextBox.Text);
+            }
+            catch (FormatException)
+            {
+                CustomThreadNumberTextBox.Clear();
+            }
+            catch (OverflowException)
+            {
+                CustomThreadNumberTextBox.Clear();
+            }
+            finally
+            {
+                CustomThreadNumber(threadNumber);
+                CustomThreadNumberTextBox.Focus();
+            }
+        }
+
+        private void CustomThreadNumber(uint threadNumber, bool updateTextBox = false)
+        {
+            CustomThreadNumberItem.Tag = threadNumber;
+            if (threadNumber > 8)
+            {
+                ThreadNumber.SelectedValue = threadNumber;
+            }
+            if (updateTextBox == true)
+            {
+                CustomThreadNumberTextBox.Text = threadNumber.ToString();
+            }
+        }
     }
 
-    //Save config
+    //About Ini Config
+    public partial class MainWindow : Window
+    {
+        private string IniConfigFileName = "Config.ini";
+
+        private string IniConfigFileVersion = "0.7.7.2";
+
+        private IniManager IniConfigManager;
+
+        private string GetIniConfigFile()
+        {
+            string iniConfigFilePath;
+            if (File.Exists(Environment.CurrentDirectory + "\\Portable") == true)
+            {
+                iniConfigFilePath = Environment.CurrentDirectory;
+            }
+            else
+            {
+                iniConfigFilePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\UniversalGUI";
+            }
+            string IniConfigFile = Path.Combine(iniConfigFilePath, IniConfigFileName);
+            return IniConfigFile;
+        }
+
+        private void ImputIniConfig(IniManager ini)
+        {
+            if (File.Exists(ini.IniFile) && File.ReadAllBytes(ini.IniFile).Length != 0)
+            {
+                if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion)
+                {
+                    try
+                    {
+                        string windowWidth = ini.Read("Window", "Width");
+                        this.Width = Convert.ToDouble(windowWidth);
+                        string windowHeight = ini.Read("Window", "Height");
+                        this.Height = Convert.ToDouble(windowHeight);
+                        AppPath.Text = ini.Read("Command", "AppPath");
+                        ArgsTemplet.Text = ini.Read("Command", "ArgsTemplet");
+                        UserArgs.Text = ini.Read("Command", "UserArgs");
+                        OutputExtension.Text = ini.Read("Output", "Extension");
+                        OutputSuffix.Text = ini.Read("Output", "Suffix");
+                        OutputFloder.Text = ini.Read("Output", "Floder");
+                        Priority.SelectedValue = ini.Read("Process", "Priority");
+                        uint threadNumber = Convert.ToUInt32(ini.Read("Process", "ThreadNumber"));
+                        if (threadNumber > 8)
+                        {
+                            CustomThreadNumber(threadNumber, updateTextBox: true);
+                        }
+                        ThreadNumber.SelectedValue = threadNumber;
+                        CUIWindowStyle.SelectedValue = ini.Read("Process", "WindowStyle");
+                    }
+                    catch(Exception e)
+                    {
+                        MessageBox.Show("There is a mistake in the configfile's format:" + "\n\n" + e.TargetSite + "\n\n" + e.Message, "Error");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Existing configFile's version is not supported.So you will use built-in config", "Hint");
+                }
+            }
+        }
+
+        private void SaveIniConfig(IniManager ini)
+        {
+            if (File.Exists(ini.IniFile))
+            {
+                if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion || File.ReadAllBytes(ini.IniFile).Length == 0)
+                {
+                    ini.Write("Versions", "ConfigFile", IniConfigFileVersion);
+                    ini.Write("Window", "Width", this.Width);
+                    ini.Write("Window", "Height", this.Height);
+                    ini.Write("Command", "AppPath", AppPath.Text);
+                    ini.Write("Command", "ArgsTemplet", ArgsTemplet.Text);
+                    ini.Write("Command", "UserArgs", UserArgs.Text);
+                    ini.Write("Output", "Extension", OutputExtension.Text);
+                    ini.Write("Output", "Suffix", OutputSuffix.Text);
+                    ini.Write("Output", "Floder", OutputFloder.Text);
+                    ini.Write("Process", "Priority", Priority.SelectedValue);
+                    ini.Write("Process", "ThreadNumber", ThreadNumber.SelectedValue);
+                    ini.Write("Process", "WindowStyle", CUIWindowStyle.SelectedValue);
+                }
+                else
+                {
+                    var result = MessageBox.Show("Existing configFile's version is not supported.Want you delete it and creat a new one?", "Hint", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        ini.CreatFile();
+                        SaveIniConfig(ini);
+                    }
+                }
+            }
+            else
+            {
+                ini.CreatFile();
+                SaveIniConfig(ini);
+            }
+        }
+    }
+
     public class Config
     {
         public LinkedList<string> FilesList = new LinkedList<string>();
-        public int FilesSum;
+        public int FilesSum = 0;
+        public int CompletedFileNum = 0;
 
         public string AppPath;
         public string ArgsTemplet;
@@ -530,8 +671,8 @@ namespace UniversalGUI
         public string OutputExtension;
         public string OutputFloder;
 
-        public int Priority;
-        public int ThreadNumber;
-        public int WindowStyle;
+        public uint Priority;
+        public uint ThreadNumber;
+        public uint WindowStyle;
     }
 }
