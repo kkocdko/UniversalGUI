@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +27,7 @@ namespace UniversalGUI
             //Change UI
             this.IsEnabled = false;
             StartTaskButton.IsEnabled = false;
-            StartTaskButton.Content = "Running";
+            StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Running");
             SetProgress(0);
 
             //Collect config on UI
@@ -42,10 +44,7 @@ namespace UniversalGUI
                     {
                         tasks[i] = NewThreadAsync();
                     }
-                    foreach (var task in tasks)
-                    {
-                        task.Wait();
-                    }
+                    Task.WaitAll(tasks);
                 }
             });
 
@@ -53,17 +52,17 @@ namespace UniversalGUI
             this.IsEnabled = true;
             if (settingLegal == true)
             {
-                StartTaskButton.Content = "Finished";
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Finished");
                 SetProgress(1);
             }
             else
             {
-                StartTaskButton.Content = "Error";
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Error");
                 SetProgress(-1);
             }
             await Task.Delay(3000); //Show result to user
             StartTaskButton.IsEnabled = true;
-            StartTaskButton.Content = "Start";
+            StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Start");
             TaskProgressBar.Visibility = Visibility.Hidden;
             SetProgress(); //擦屁股
         }
@@ -194,7 +193,10 @@ namespace UniversalGUI
                 default:
                     break;
             }
+
             process.Start();
+
+            process.PriorityBoostEnabled = false;
             switch (priority)
             {
                 case 1:
@@ -248,11 +250,10 @@ namespace UniversalGUI
         public MainWindow()
         {
             InitializeComponent();
-
             DefaultTitle = this.Title;
-
             IniConfigManager = new IniManager(GetIniConfigFile());
             ImputIniConfig(IniConfigManager);
+            SetLanguage();
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -271,6 +272,30 @@ namespace UniversalGUI
     {
         private string DefaultTitle;
 
+        private string QueryLangDict(string key)
+        {
+            return Application.Current.FindResource(key).ToString();
+        }
+
+        private void SetLanguage()
+        {
+            var dictionaryList = new List<ResourceDictionary>();
+            foreach (var dictionary in Application.Current.Resources.MergedDictionaries)
+            {
+                dictionaryList.Add(dictionary);
+            }
+            string culture = Thread.CurrentThread.CurrentCulture.ToString();
+            string requestedCulture = string.Format(@"Resources\Languages\{0}.xaml", culture);
+            var resourceDictionary = dictionaryList.FirstOrDefault(d => d.Source.OriginalString.Equals(requestedCulture));
+            if (resourceDictionary == null)
+            {
+                requestedCulture = @"Resources\Languages\en-US.xaml";
+                resourceDictionary = dictionaryList.FirstOrDefault(d => d.Source.OriginalString.Equals(requestedCulture));
+            }
+            Application.Current.Resources.MergedDictionaries.Remove(resourceDictionary);
+            Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
+        }
+
         private void StartTaskAsync(object sender, RoutedEventArgs e) => StartTaskAsync();
 
         private void SetProgress(double multiple = -2)
@@ -284,7 +309,8 @@ namespace UniversalGUI
             }
             else if (multiple == -1) //错误警告
             {
-                SetTitleSuffix("Error");
+                string suffix = QueryLangDict("Window_MainWindow_Title_Suffix_Error");
+                SetTitleSuffix(suffix);
                 TaskProgressBar.Foreground = new SolidColorBrush(Colors.Red);
                 TaskProgressBar.Value = 100;
                 TaskProgressBar.Visibility = Visibility.Visible;
@@ -361,7 +387,7 @@ namespace UniversalGUI
                     Dispatcher.Invoke(() =>
                     {
                         MonitorForCPU.Text = cpuUseRatio + "%";
-                        MonitorForMem.Text = usedMem + memUnit + " (" + memUseRatio + "%)";
+                        MonitorForRAM.Text = usedMem + memUnit + " (" + memUseRatio + "%)";
                     });
 
                     Thread.Sleep(1000);
@@ -371,31 +397,37 @@ namespace UniversalGUI
 
         private bool CheckConfig()
         {
+            string title = QueryLangDict("MessageBox_Title_Error");
             if (FilesList.Items.Count == 0)
             {
-                MessageBox.Show("Please add file into fileslist.", "Error");
+                string content = QueryLangDict("MessageBox_Content_CheckConfig_FileslistIsEmpty");
+                MessageBox.Show(content, title);
                 return false;
             }
             else if (AppPath.Text == "")
             {
-                MessageBox.Show("Please input command application's path.", "Error");
+                string content = QueryLangDict("MessageBox_Content_CheckConfig_CommandApplicationIsUnspecified");
+                MessageBox.Show(content, title);
                 return false;
             }
             else if (ArgsTemplet.Text == "")
             {
-                MessageBox.Show("Please input arguments' templet.", "Error");
+                string content = QueryLangDict("MessageBox_Content_CheckConfig_ArgumentsTempletIsUnspecified");
+                MessageBox.Show(content, title);
                 return false;
             }
             else if (OutputFloder.Text == "" && OutputExtension.Text == "" && OutputSuffix.Text == "")
             {
-                MessageBox.Show("If you want to output into source floder,in output extension and suffix, you need to fill in at least one.", "Error");
+                string content = QueryLangDict("MessageBox_Content_CheckConfig_OutputSettingsIsConflicting");
+                MessageBox.Show(content, title);
                 return false;
             }
             else if (CustomThreadNumberItem.IsSelected == true)
             {
                 if (Convert.ToInt32(CustomThreadNumberItem.Tag) == 0 || CustomThreadNumberTextBox.Text == "")
                 {
-                    MessageBox.Show("Thread number is illegal.", "Error");
+                    string content = QueryLangDict("MessageBox_Content_CheckConfig_ThreadNumberIsIllegal");
+                    MessageBox.Show(content, title);
                     return false;
                 }
             }
@@ -563,7 +595,7 @@ namespace UniversalGUI
     {
         private string IniConfigFileName = "Config.ini";
 
-        private string IniConfigFileVersion = "0.7.7.2";
+        private string IniConfigFileVersion = "0.7.7.2"; //这是配置文件的版本，不是程序版本
 
         private IniManager IniConfigManager;
 
@@ -608,15 +640,24 @@ namespace UniversalGUI
                         }
                         ThreadNumber.SelectedValue = threadNumber;
                         CUIWindowStyle.SelectedValue = ini.Read("Process", "WindowStyle");
+                        string culture = ini.Read("Language", "Culture");
+                        if (culture != "")
+                        {
+                            Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
+                        }
                     }
                     catch(Exception e)
                     {
-                        MessageBox.Show("There is a mistake in the configfile's format:" + "\n\n" + e.TargetSite + "\n\n" + e.Message, "Error");
+                        string title = QueryLangDict("MessageBox_Title_Error");
+                        string content = QueryLangDict("MessageBox_Content_Configfile_FormatMistake");
+                        MessageBox.Show(content + "\n\n" + e.TargetSite + "\n\n" + e.Message, title);
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Existing configFile's version is not supported.So you will use built-in config", "Hint");
+                    string title = QueryLangDict("MessageBox_Title_Hint");
+                    string content = QueryLangDict("MessageBox_Content_Configfile_VersionMistake_UseBuildInOne");
+                    MessageBox.Show(content, title);
                 }
             }
         }
@@ -642,7 +683,9 @@ namespace UniversalGUI
                 }
                 else
                 {
-                    var result = MessageBox.Show("Existing configFile's version is not supported.Want you delete it and creat a new one?", "Hint", MessageBoxButton.YesNo);
+                    string title = QueryLangDict("MessageBox_Title_Hint");
+                    string content = QueryLangDict("MessageBox_Content_Configfile_VersionMistake_CreatNewOne");
+                    var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
                     if (result == MessageBoxResult.Yes)
                     {
                         ini.CreatFile();
