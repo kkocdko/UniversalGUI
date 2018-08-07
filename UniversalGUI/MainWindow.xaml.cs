@@ -97,13 +97,13 @@ namespace UniversalGUI
 
         private string SumAppArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
-            //去前后引号
-            inputFile = new Regex("[(^\")(\"$)]").Replace(inputFile, "");
-            argsTemplet = new Regex("[(^\")(\"$)]").Replace(argsTemplet, "");
-            userArgs = new Regex("[(^\")(\"$)]").Replace(userArgs, "");
-            outputSuffix = new Regex("[(^\")(\"$)]").Replace(outputSuffix, "");
-            outputExtension = new Regex("[(^\")(\"$)]").Replace(outputExtension, "");
-            outputFloder = new Regex("[(^\")(\"$)]").Replace(outputFloder, "");
+            //去所有引号（包括前后引号和中间的引号）
+            inputFile = new Regex("\"").Replace(inputFile, "");
+            argsTemplet = new Regex("\"").Replace(argsTemplet, "");
+            userArgs = new Regex("\"").Replace(userArgs, "");
+            outputSuffix = new Regex("\"").Replace(outputSuffix, "");
+            outputExtension = new Regex("\"").Replace(outputExtension, "");
+            outputFloder = new Regex("\"").Replace(outputFloder, "");
 
             string arguments = argsTemplet;
 
