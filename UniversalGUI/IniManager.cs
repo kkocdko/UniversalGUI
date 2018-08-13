@@ -100,7 +100,7 @@ public class IniManager
     public void Write(string section, string key, object value)
     {
         string strValue = Convert.ToString(value);
-        Write(section, key, strValue);
+        Write(section, key, Convert.ToString(value));
     }
 
     /// <summary>

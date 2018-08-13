@@ -45,6 +45,7 @@
     <sys:String x:Key="TextBlock_MonitorForRAM_Text">内存:</sys:String>
     <sys:String x:Key="MessageBox_Title_Error">错误</sys:String>
     <sys:String x:Key="MessageBox_Title_Hint">提示</sys:String>
+    <sys:String x:Key="MessageBox_Content_Help_ArgsTemplet">你可以使用{UserParameters},{InputFile}和{OutputFile}这三个标记。</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_FormatMistake">配置文件的格式有错误：</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_UseBuildInOne">配置文件的版本不受支持。你将会使用内置配置。</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_CreatNewOne">配置文件的版本不受支持。你想要删除它然后创建一个新的吗？</sys:String>

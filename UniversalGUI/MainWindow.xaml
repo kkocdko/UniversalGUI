@@ -7,7 +7,7 @@
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
         x:Class="UniversalGUI.MainWindow"
         mc:Ignorable="d"
-        Title="{DynamicResource Window_MainWindow_Title}" Height="500" Width="700" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded">
+        Title="{DynamicResource Window_MainWindow_Title}" Height="425" Width="700" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded">
    
     <Grid>
         <Button x:Name="StartTaskButton" Content="{DynamicResource Button_StartTask_Content_Start}" HorizontalAlignment="Right" Height="50" Margin="0,0,20,20" VerticalAlignment="Bottom" Width="100" FontSize="16" Click="StartTaskAsync" Style="{DynamicResource FlatButton}"/>
@@ -29,8 +29,9 @@
                 <Button Content="..." HorizontalAlignment="Right" Height="20" Margin="0,25,5,0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="SwitchApplicationPath" Style="{DynamicResource FlatButton}" Panel.ZIndex="1" />
 
                 <TextBlock Height="20" Margin="5,55,5,0" Text="{DynamicResource TextBlock_ArgsTemplet_Text}" VerticalAlignment="Top"/>
-                <TextBox x:Name="ArgsTemplet" Height="20" Margin="5,75,5,0" VerticalAlignment="Top" Text="{}{UserParameters} {InputFile} {OutputFile}"/>
-
+                <TextBox x:Name="ArgsTemplet" Height="20" Margin="5,75,24,0" VerticalAlignment="Top" Text="{}{UserParameters} {InputFile} {OutputFile}"/>
+                <Button Content="?" HorizontalAlignment="Right" Height="20" Margin="0,75,5,0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="ShowArgsTempletHelp" Style="{DynamicResource FlatButton}" Panel.ZIndex="1" />
+                
                 <TextBlock Height="20" Margin="5,105,5,0" Text="{DynamicResource TextBlock_UserArgs_Text}" VerticalAlignment="Top"/>
                 <TextBox x:Name="UserArgs" Margin="5,125,5,5" TextWrapping="Wrap"/>
             </Grid>

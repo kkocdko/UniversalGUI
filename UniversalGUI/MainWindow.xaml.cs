@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace UniversalGUI
 {
@@ -97,14 +98,14 @@ namespace UniversalGUI
 
         private string SumAppArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
-            //去所有引号（包括前后引号和中间的引号）
-            inputFile = new Regex("\"").Replace(inputFile, "");
-            argsTemplet = new Regex("\"").Replace(argsTemplet, "");
-            userArgs = new Regex("\"").Replace(userArgs, "");
-            outputSuffix = new Regex("\"").Replace(outputSuffix, "");
-            outputExtension = new Regex("\"").Replace(outputExtension, "");
-            outputFloder = new Regex("\"").Replace(outputFloder, "");
-
+            //去前后引号
+            inputFile = new Regex("(^\")|(\"$)").Replace(inputFile, "");
+            argsTemplet = new Regex("(^\")|(\"$)").Replace(argsTemplet, "");
+            userArgs = new Regex("(^\")|(\"$)").Replace(userArgs, "");
+            outputSuffix = new Regex("(^\")|(\"$)").Replace(outputSuffix, "");
+            outputExtension = new Regex("(^\")|(\"$)").Replace(outputExtension, "");
+            outputFloder = new Regex("(^\")|(\"$)").Replace(outputFloder, "");
+            
             string arguments = argsTemplet;
 
             //替换 {UserParameters}
@@ -254,6 +255,7 @@ namespace UniversalGUI
             IniConfigManager = new IniManager(GetIniConfigFile());
             ImputIniConfig(IniConfigManager);
             SetLanguage();
+            LoadResoureDll.RegistDLL(); //导入引用的DLL
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -306,6 +308,8 @@ namespace UniversalGUI
                 TaskProgressBar.Value = 0;
                 TaskProgressBar.Foreground = new SolidColorBrush(Colors.DimGray);
                 TaskProgressBar.Visibility = Visibility.Hidden;
+                TaskbarManager.Instance.SetProgressValue(0, 100, this);
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress, this);
             }
             else if (multiple == -1) //错误警告
             {
@@ -314,13 +318,17 @@ namespace UniversalGUI
                 TaskProgressBar.Foreground = new SolidColorBrush(Colors.Red);
                 TaskProgressBar.Value = 100;
                 TaskProgressBar.Visibility = Visibility.Visible;
+                TaskbarManager.Instance.SetProgressValue(100, 100, this);
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error, this);
             }
             else if (multiple >= 0 && multiple <= 1) //修改
             {
-                double percent = Math.Round(multiple * 100);
+                int percent = Convert.ToInt32(Math.Round(multiple * 100));
                 SetTitleSuffix(percent + "%");
                 TaskProgressBar.Value = percent;
                 TaskProgressBar.Visibility = Visibility.Visible;
+                TaskbarManager.Instance.SetProgressValue(percent, 100, this);
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal, this);
             }
         }
 
@@ -345,42 +353,43 @@ namespace UniversalGUI
                 double cpuUseRatio;
                 var computerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
                 double usedMem;
-                double memUseRatio;
                 string memUnit = "KB";
+                double memUseRatio;
                 while (true)
                 {
                     cpuUseRatio = Math.Round(cpuPerformanceCounter.NextValue());
                     usedMem = (double)computerInfo.TotalPhysicalMemory - computerInfo.AvailablePhysicalMemory;
                     memUseRatio = Math.Round((double)usedMem / computerInfo.TotalPhysicalMemory * 100);
 
-                    if (usedMem > 1073634449817.6) //大于999.9GB
+                    //按需切换占用内存大小的显示单位及精度
+                    if (usedMem >= 1099511627776) //占用内存>=1TB
                     {
                         memUnit = "TB";
-                        usedMem = usedMem / 1024 / 1024 / 1024 / 1024;
+                        usedMem = usedMem / 1099511627776; //1024^4（4次方）
                         usedMem = Math.Round(usedMem, 3);
                     }
-                    else if (usedMem > 107363444981.76) //大于99.99GB
+                    else if (usedMem >= 107374182400) //>=100GB
                     {
                         memUnit = "GB";
-                        usedMem = usedMem / 1024 / 1024 / 1024;
+                        usedMem = usedMem / 1073741824; //^3
                         usedMem = Math.Round(usedMem, 1);
                     }
-                    else if (usedMem > 10736344498.176) //大于9.999GB
+                    else if (usedMem >= 10737418240) //>=10GB
                     {
                         memUnit = "GB";
-                        usedMem = usedMem / 1024 / 1024 / 1024;
+                        usedMem = usedMem / 1073741824; //^3
                         usedMem = Math.Round(usedMem, 2);
                     }
-                    else if (usedMem > 1048471142.4) //大于999.9MB
+                    else if (usedMem >= 1073741824) //>=1GB
                     {
                         memUnit = "GB";
-                        usedMem = usedMem / 1024 / 1024 / 1024;
+                        usedMem = usedMem / 1073741824; //^3
                         usedMem = Math.Round(usedMem, 3);
                     }
-                    else if (usedMem > 104847114.24) //大于99.99MB
+                    else if (usedMem >= 104857600) //>=100MB
                     {
                         memUnit = "MB";
-                        usedMem = usedMem / 1024 / 1024;
+                        usedMem = usedMem / 1048576;//^2
                         usedMem = Math.Round(usedMem, 1);
                     }
 
@@ -509,6 +518,13 @@ namespace UniversalGUI
         {
             string[] dropFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
             AppPath.Text = dropFiles[0];
+        }
+        
+        private void ShowArgsTempletHelp(object sender, RoutedEventArgs e)
+        {
+            string title = QueryLangDict("MessageBox_Title_Hint");
+            string content = QueryLangDict("MessageBox_Content_Help_ArgsTemplet");
+            MessageBox.Show(content, title);
         }
 
         private void SwitchOutputFloder(object sender, RoutedEventArgs e)
