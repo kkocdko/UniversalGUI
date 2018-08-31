@@ -250,12 +250,12 @@ namespace UniversalGUI
     {
         public MainWindow()
         {
+            LoadResoureDll.RegistDLL(); //导入引用的DLL
             InitializeComponent();
             DefaultTitle = this.Title;
             IniConfigManager = new IniManager(GetIniConfigFile());
             ImputIniConfig(IniConfigManager);
             SetLanguage();
-            LoadResoureDll.RegistDLL(); //导入引用的DLL
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
