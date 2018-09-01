@@ -57,7 +57,7 @@ namespace UniversalGUI
         /// <summary>
         /// 注册资源中的dll
         /// </summary>
-        /// <param name="pattern">*表示连续的未知字符,_表示单个未知字符,如*.dll</param>
+        /// <param name="pattern">*表示连续的未知字符, _表示单个未知字符, 如*.dll</param>
         public static void RegistDLL(string pattern = "*.dll")
         {
             System.IO.Directory.GetFiles("", "");
@@ -70,14 +70,14 @@ namespace UniversalGUI
             }
             //程序集加入已处理集合
             Assemblies.Add(ass.FullName, null);
-            //绑定程序集加载失败事件(这里我测试了,就算重复绑也是没关系的)
+            //绑定程序集加载失败事件(这里我测试了, 就算重复绑也是没关系的)
             AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolve;
             //获取所有资源文件文件名
             var res = ass.GetManifestResourceNames();
             var regex = new Regex("^" + pattern.Replace(".", "\\.").Replace("*", ".*").Replace("_", ".") + "$", RegexOptions.IgnoreCase);
             foreach (var r in res)
             {
-                //如果是dll,则加载
+                //如果是dll, 则加载
                 if (regex.IsMatch(r))
                 {
                     try

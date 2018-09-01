@@ -20,6 +20,8 @@
     <sys:String x:Key="GroupBox_Command_Header">Command</sys:String>
     <sys:String x:Key="TextBlock_AppPath_Text">Application path:</sys:String>
     <sys:String x:Key="TextBlock_ArgsTemplet_Text">Arguments templet:</sys:String>
+    <sys:String x:Key="MenuItem_ArgsTemplet_Header_InsertMark">Insert mark</sys:String>
+    <sys:String x:Key="MenuItem_ArgsTemplet_Header_Help">Help</sys:String>
     <sys:String x:Key="TextBlock_UserArgs_Text">User arguments:</sys:String>
     <sys:String x:Key="GroupBox_Output_Header">Output</sys:String>
     <sys:String x:Key="TextBlock_OutputExtension_Text">Extension:</sys:String>
@@ -40,18 +42,21 @@
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Minimized_Content">Minimized</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Normal_Content">Normal</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Maximized_Content">Maximized</sys:String>
+    <sys:String x:Key="TextBlock_SimulateCmd_Text">Simulate cmd</sys:String>
+    <sys:String x:Key="ComboBoxItem_Disabled_Content">Disabled</sys:String>
+    <sys:String x:Key="ComboBoxItem_Enabled_Content">Enabled</sys:String>
     <sys:String x:Key="GroupBox_Monitor_Header">Monitor</sys:String>
     <sys:String x:Key="TextBlock_MonitorForCPU_Text">CPU:</sys:String>
     <sys:String x:Key="TextBlock_MonitorForRAM_Text">RAM:</sys:String>
     <sys:String x:Key="MessageBox_Title_Error">Error</sys:String>
     <sys:String x:Key="MessageBox_Title_Hint">Hint</sys:String>
-    <sys:String x:Key="MessageBox_Content_Help_ArgsTemplet">You can use mark {UserParameters},{InputFile} and {OutputFile}.</sys:String>
+    <sys:String x:Key="MessageBox_Content_Help_ArgsTemplet">You can use mark {UserParameters}, {InputFile} and {OutputFile}.</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_FormatMistake">There is a mistake in the configfile's format:</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_UseBuildInOne">Existing configfile's version is not supported.So you will use built-in config.</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_CreatNewOne">Existing configfile's version is not supported.Want you delete it and creat a new one?</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_FileslistIsEmpty">Please add file into fileslist.</sys:String>
-    <sys:String x:Key="MessageBox_Content_CheckConfig_CommandApplicationIsUnspecified">Please input command application's path.</sys:String>
-    <sys:String x:Key="MessageBox_Content_CheckConfig_ArgumentsTempletIsUnspecified">Please input arguments' templet.</sys:String>
-    <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsConflicting">If you want to output into source floder,in output extension and suffix, you need to fill in at least one.</sys:String>
+    <sys:String x:Key="MessageBox_Content_CheckConfig_CommandAppIsUnspecified">Please input command application's path.</sys:String>
+    <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsConflicting">If you want to output into source floder, in output extension and suffix, you need to fill in at least one.</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_ThreadNumberIsIllegal">Thread number is illegal.</sys:String>
+    <sys:String x:Key="MessageBox_Content_CheckConfig_SimulateCmdConfigIsIllegal">If CMD simulate is enabled, the path to the source program cannot contain spaces.</sys:String>
 </ResourceDictionary>

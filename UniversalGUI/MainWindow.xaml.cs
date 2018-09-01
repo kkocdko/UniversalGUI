@@ -35,6 +35,7 @@ namespace UniversalGUI
             SumConfig();
             bool settingLegal = CheckConfig();
 
+            //debug
             //Run on background thread
             await Task.Run(() =>
             {
@@ -86,7 +87,8 @@ namespace UniversalGUI
                         appPath: config.AppPath,
                         appArgs: sumAppArgs,
                         windowStyle: config.WindowStyle,
-                        priority: config.Priority);
+                        priority: config.Priority,
+                        simulateCmd: config.SimulateCmd);
                 });
                 config.CompletedFileNum++;
                 Dispatcher.Invoke(() =>
@@ -101,17 +103,16 @@ namespace UniversalGUI
             //去前后引号
             inputFile = new Regex("(^\")|(\"$)").Replace(inputFile, "");
             argsTemplet = new Regex("(^\")|(\"$)").Replace(argsTemplet, "");
-            userArgs = new Regex("(^\")|(\"$)").Replace(userArgs, "");
             outputSuffix = new Regex("(^\")|(\"$)").Replace(outputSuffix, "");
             outputExtension = new Regex("(^\")|(\"$)").Replace(outputExtension, "");
             outputFloder = new Regex("(^\")|(\"$)").Replace(outputFloder, "");
-            
-            string arguments = argsTemplet;
+
+            string args = argsTemplet;
 
             //替换 {UserParameters}
             {
                 //替换模板中的标记
-                arguments = new Regex(@"\{UserParameters\}").Replace(arguments, userArgs);
+                args = new Regex(@"\{UserParameters\}").Replace(args, userArgs);
             }
 
             //替换 {InputFile}
@@ -119,7 +120,7 @@ namespace UniversalGUI
                 //加前后引号
                 string inputFile2 = "\"" + inputFile + "\"";
                 //替换模板中的标记
-                arguments = new Regex(@"\{InputFile\}").Replace(arguments, inputFile2);
+                args = new Regex(@"\{InputFile\}").Replace(args, inputFile2);
             }
 
             //替换 {OutputFile}
@@ -166,17 +167,31 @@ namespace UniversalGUI
                 //加前后引号
                 outputFile = "\"" + outputFile + "\"";
                 //替换模板中的标记
-                arguments = new Regex(@"\{OutputFile\}").Replace(arguments, outputFile);
+                args = new Regex(@"\{OutputFile\}").Replace(args, outputFile);
             }
 
-            return arguments;
+            return args;
         }
 
-        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority)
+        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd)
         {
             var process = new Process();
-            process.StartInfo.FileName = appPath;
-            process.StartInfo.Arguments = appArgs;
+            if (simulateCmd == false)
+            {
+                process.StartInfo.FileName = appPath;
+                process.StartInfo.Arguments = appArgs;
+            }
+            else
+            {
+                process.StartInfo.FileName = "cmd.exe";
+                process.StartInfo.Arguments = "/c" + " " + appPath + " " + appArgs; //这边不能给appPath加引号
+            }
+
+            Debug.WriteLine(process.StartInfo.Arguments);
+            //int id = process.Id;
+            //Process.GetProcessById(999999).Kill();
+            //Process.GetCurrentProcess().Kill();
+
             switch (windowStyle)
             {
                 case 1:
@@ -191,11 +206,16 @@ namespace UniversalGUI
                 case 4:
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Maximized;
                     break;
-                default:
-                    break;
             }
 
-            process.Start();
+            try
+            {
+                process.Start();
+            }
+            catch (System.ComponentModel.Win32Exception e)
+            {
+                Debug.WriteLine(e.ToString());
+            }
 
             process.PriorityBoostEnabled = false;
             switch (priority)
@@ -241,6 +261,15 @@ namespace UniversalGUI
                 config.Priority = Convert.ToUInt32(Priority.SelectedValue);
                 config.ThreadNumber = Convert.ToUInt32(ThreadNumber.SelectedValue);
                 config.WindowStyle = Convert.ToUInt32(CUIWindowStyle.SelectedValue);
+                switch (Convert.ToUInt32(SimulateCmd.SelectedValue))
+                {
+                    case 1:
+                        config.SimulateCmd = false;
+                        break;
+                    case 2:
+                        config.SimulateCmd = true;
+                        break;
+                }
             });
         }
     }
@@ -321,7 +350,7 @@ namespace UniversalGUI
                 TaskbarManager.Instance.SetProgressValue(100, 100, this);
                 TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error, this);
             }
-            else if (multiple >= 0 && multiple <= 1) //修改
+            else if (multiple >= 0 && multiple <= 1) //一般修改
             {
                 int percent = Convert.ToInt32(Math.Round(multiple * 100));
                 SetTitleSuffix(percent + "%");
@@ -340,7 +369,7 @@ namespace UniversalGUI
             }
             else
             {
-                Title = DefaultTitle + " [" + suffix + "]";
+                Title = DefaultTitle + " " + suffix;
             }
         }
 
@@ -365,31 +394,31 @@ namespace UniversalGUI
                     if (usedMem >= 1099511627776) //占用内存>=1TB
                     {
                         memUnit = "TB";
-                        usedMem = usedMem / 1099511627776; //1024^4（4次方）
+                        usedMem /= 1099511627776; //1024^4（4次方）
                         usedMem = Math.Round(usedMem, 3);
                     }
                     else if (usedMem >= 107374182400) //>=100GB
                     {
                         memUnit = "GB";
-                        usedMem = usedMem / 1073741824; //^3
+                        usedMem /= 1073741824; //^3
                         usedMem = Math.Round(usedMem, 1);
                     }
                     else if (usedMem >= 10737418240) //>=10GB
                     {
                         memUnit = "GB";
-                        usedMem = usedMem / 1073741824; //^3
+                        usedMem /= 1073741824; //^3
                         usedMem = Math.Round(usedMem, 2);
                     }
                     else if (usedMem >= 1073741824) //>=1GB
                     {
                         memUnit = "GB";
-                        usedMem = usedMem / 1073741824; //^3
+                        usedMem /= 1073741824; //^3
                         usedMem = Math.Round(usedMem, 3);
                     }
                     else if (usedMem >= 104857600) //>=100MB
                     {
                         memUnit = "MB";
-                        usedMem = usedMem / 1048576;//^2
+                        usedMem /= 1048576;//^2
                         usedMem = Math.Round(usedMem, 1);
                     }
 
@@ -415,13 +444,7 @@ namespace UniversalGUI
             }
             else if (AppPath.Text == "")
             {
-                string content = QueryLangDict("MessageBox_Content_CheckConfig_CommandApplicationIsUnspecified");
-                MessageBox.Show(content, title);
-                return false;
-            }
-            else if (ArgsTemplet.Text == "")
-            {
-                string content = QueryLangDict("MessageBox_Content_CheckConfig_ArgumentsTempletIsUnspecified");
+                string content = QueryLangDict("MessageBox_Content_CheckConfig_CommandAppIsUnspecified");
                 MessageBox.Show(content, title);
                 return false;
             }
@@ -439,6 +462,12 @@ namespace UniversalGUI
                     MessageBox.Show(content, title);
                     return false;
                 }
+            }
+            else if (AppPath.Text.IndexOf(' ') != -1 && Convert.ToInt32(SimulateCmd.SelectedValue) == 2)
+            {
+                string content = QueryLangDict("MessageBox_Content_CheckConfig_SimulateCmdConfigIsIllegal");
+                MessageBox.Show(content, title);
+                return false;
             }
             return true;
         }
@@ -495,7 +524,7 @@ namespace UniversalGUI
             }
         }
 
-        private void SwitchApplicationPath(object sender, RoutedEventArgs e)
+        private void SwitchAppPath(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog()
             {
@@ -508,18 +537,44 @@ namespace UniversalGUI
             }
         }
 
-        private void ApplicationPath_PreviewDragOver(object sender, DragEventArgs e)
+        private void AppPath_PreviewDragOver(object sender, DragEventArgs e)
         {
             e.Effects = DragDropEffects.Copy;
             e.Handled = true;
         }
 
-        private void ApplicationPath_PreviewDrop(object sender, DragEventArgs e)
+        private void AppPath_PreviewDrop(object sender, DragEventArgs e)
         {
             string[] dropFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
             AppPath.Text = dropFiles[0];
         }
-        
+
+        private void InsertArgsTempletTag(string tagContent)
+        {
+            string text = ArgsTemplet.Text;
+            string insertContent = "{" + tagContent + "}";
+            int selectionStart = ArgsTemplet.SelectionStart;
+            text = text.Insert(selectionStart, insertContent);
+            ArgsTemplet.Text = text;
+            ArgsTemplet.SelectionStart = selectionStart + insertContent.Length;
+            ArgsTemplet.Focus();
+        }
+
+        private void InsertArgsTempletMark_UserParameters(object sender, RoutedEventArgs e)
+        {
+            InsertArgsTempletTag("UserParameters");
+        }
+
+        private void InsertArgsTempletMark_InputFile(object sender, RoutedEventArgs e)
+        {
+            InsertArgsTempletTag("InputFile");
+        }
+
+        private void InsertArgsTempletMark_OutputFile(object sender, RoutedEventArgs e)
+        {
+            InsertArgsTempletTag("OutputFile");
+        }
+
         private void ShowArgsTempletHelp(object sender, RoutedEventArgs e)
         {
             string title = QueryLangDict("MessageBox_Title_Hint");
@@ -656,13 +711,14 @@ namespace UniversalGUI
                         }
                         ThreadNumber.SelectedValue = threadNumber;
                         CUIWindowStyle.SelectedValue = ini.Read("Process", "WindowStyle");
+                        SimulateCmd.SelectedValue = ini.Read("Process", "SimulateCmd");
                         string culture = ini.Read("Language", "Culture");
                         if (culture != "")
                         {
                             Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
                         }
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         string title = QueryLangDict("MessageBox_Title_Error");
                         string content = QueryLangDict("MessageBox_Content_Configfile_FormatMistake");
@@ -696,6 +752,7 @@ namespace UniversalGUI
                     ini.Write("Process", "Priority", Priority.SelectedValue);
                     ini.Write("Process", "ThreadNumber", ThreadNumber.SelectedValue);
                     ini.Write("Process", "WindowStyle", CUIWindowStyle.SelectedValue);
+                    ini.Write("Process", "SimulateCmd", SimulateCmd.SelectedValue);
                 }
                 else
                 {
@@ -723,6 +780,8 @@ namespace UniversalGUI
         public int FilesSum = 0;
         public int CompletedFileNum = 0;
 
+        public LinkedList<int> runningProcessesID = new LinkedList<int>();
+
         public string AppPath;
         public string ArgsTemplet;
         public string UserArgs;
@@ -733,5 +792,6 @@ namespace UniversalGUI
         public uint Priority;
         public uint ThreadNumber;
         public uint WindowStyle;
+        public bool SimulateCmd;
     }
 }

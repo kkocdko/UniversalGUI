@@ -20,6 +20,8 @@
     <sys:String x:Key="GroupBox_Command_Header">命令设置</sys:String>
     <sys:String x:Key="TextBlock_AppPath_Text">程序路径:</sys:String>
     <sys:String x:Key="TextBlock_ArgsTemplet_Text">参数模板:</sys:String>
+    <sys:String x:Key="MenuItem_ArgsTemplet_Header_InsertMark">插入标记</sys:String>
+    <sys:String x:Key="MenuItem_ArgsTemplet_Header_Help">帮助</sys:String>
     <sys:String x:Key="TextBlock_UserArgs_Text">用户参数:</sys:String>
     <sys:String x:Key="GroupBox_Output_Header">输出设置</sys:String>
     <sys:String x:Key="TextBlock_OutputExtension_Text">拓展名:</sys:String>
@@ -40,18 +42,21 @@
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Minimized_Content">最小化</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Normal_Content">正常</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Maximized_Content">最大化</sys:String>
+    <sys:String x:Key="TextBlock_SimulateCmd_Text">模拟cmd</sys:String>
+    <sys:String x:Key="ComboBoxItem_Disabled_Content">已启用</sys:String>
+    <sys:String x:Key="ComboBoxItem_Enabled_Content">已禁用</sys:String>
     <sys:String x:Key="GroupBox_Monitor_Header">资源监视</sys:String>
     <sys:String x:Key="TextBlock_MonitorForCPU_Text">处理器:</sys:String>
     <sys:String x:Key="TextBlock_MonitorForRAM_Text">内存:</sys:String>
     <sys:String x:Key="MessageBox_Title_Error">错误</sys:String>
     <sys:String x:Key="MessageBox_Title_Hint">提示</sys:String>
-    <sys:String x:Key="MessageBox_Content_Help_ArgsTemplet">你可以使用{UserParameters},{InputFile}和{OutputFile}这三个标记。</sys:String>
+    <sys:String x:Key="MessageBox_Content_Help_ArgsTemplet">你可以使用{UserParameters}, {InputFile}和{OutputFile}这三个标记。</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_FormatMistake">配置文件的格式有错误：</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_UseBuildInOne">配置文件的版本不受支持。你将会使用内置配置。</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_CreatNewOne">配置文件的版本不受支持。你想要删除它然后创建一个新的吗？</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_FileslistIsEmpty">请添加文件到文件列表。</sys:String>
-    <sys:String x:Key="MessageBox_Content_CheckConfig_CommandApplicationIsUnspecified">请输入命令行应用程序的路径。</sys:String>
-    <sys:String x:Key="MessageBox_Content_CheckConfig_ArgumentsTempletIsUnspecified">请输入参数模板。</sys:String>
+    <sys:String x:Key="MessageBox_Content_CheckConfig_CommandAppIsUnspecified">请输入命令行应用程序的路径。</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsConflicting">如果你想要输出到原文件夹，那么在拓展名和后缀之中，至少要填写一个。</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_ThreadNumberIsIllegal">线程数量不合规。</sys:String>
+    <sys:String x:Key="MessageBox_Content_CheckConfig_SimulateCmdConfigIsIllegal">如果启用了CMD模拟，那么源程序的路径中不能含有空格。</sys:String>
 </ResourceDictionary>
