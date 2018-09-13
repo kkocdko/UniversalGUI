@@ -25,17 +25,22 @@ namespace UniversalGUI
 
         public async void StartTaskAsync()
         {
+            //Stop task
+            if(TaskProgressBar.Visibility == Visibility.Visible)
+            {
+                StopTask();
+                return;
+            }
+
             //Change UI
-            this.IsEnabled = false;
-            StartTaskButton.IsEnabled = false;
-            StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Running");
+            TaskSettings.IsEnabled = false;
+            StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Stop");
             SetProgress(0);
 
             //Collect config on UI
             SumConfig();
             bool settingLegal = CheckConfig();
-
-            //debug
+            
             //Run on background thread
             await Task.Run(() =>
             {
@@ -51,7 +56,7 @@ namespace UniversalGUI
             });
 
             //Change UI
-            this.IsEnabled = true;
+            TaskSettings.IsEnabled = true;
             if (settingLegal == true)
             {
                 StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Finished");
@@ -63,34 +68,47 @@ namespace UniversalGUI
                 SetProgress(-1);
             }
             await Task.Delay(3000); //Show result to user
-            StartTaskButton.IsEnabled = true;
             StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Start");
             TaskProgressBar.Visibility = Visibility.Hidden;
             SetProgress(); //擦屁股
+        }
+
+        public void StopTask()
+        {
+            config = new Config();
         }
 
         public async Task NewThreadAsync()
         {
             while (config.FilesList.Count > 0)
             {
-                string sumAppArgs = SumAppArgs(
+                string inputFile = Dispatcher.Invoke(() =>
+                {
+                    string firstFile = config.FilesList.First.Value;
+                    config.FilesList.RemoveFirst();
+                    return firstFile;
+                });
+
+                string appArgs = SumAppArgs(
                     argsTemplet: config.ArgsTemplet,
-                    inputFile: config.FilesList.First.Value, //链表中第一个文件
+                    inputFile: inputFile,
                     userArgs: config.UserArgs,
                     outputSuffix: config.OutputSuffix,
                     outputExtension: config.OutputExtension,
                     outputFloder: config.OutputFloder);
-                config.FilesList.RemoveFirst(); //弹出链表中第一个文件
+                
                 await Task.Run(() =>
                 {
                     NewProcess(
                         appPath: config.AppPath,
-                        appArgs: sumAppArgs,
+                        appArgs: appArgs,
                         windowStyle: config.WindowStyle,
                         priority: config.Priority,
                         simulateCmd: config.SimulateCmd);
                 });
+
                 config.CompletedFileNum++;
+
                 Dispatcher.Invoke(() =>
                 {
                     SetProgress((double)config.CompletedFileNum / config.FilesSum);
@@ -215,6 +233,12 @@ namespace UniversalGUI
             catch (System.ComponentModel.Win32Exception e)
             {
                 Debug.WriteLine(e.ToString());
+                return;
+            }
+            catch (System.InvalidOperationException e)
+            {
+                Debug.WriteLine(e.ToString());
+                return;
             }
 
             process.PriorityBoostEnabled = false;
@@ -369,7 +393,7 @@ namespace UniversalGUI
             }
             else
             {
-                Title = DefaultTitle + " " + suffix;
+                Title = DefaultTitle + " [" + suffix + "] ";
             }
         }
 

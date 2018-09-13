@@ -12,7 +12,8 @@
     <Grid>
         <Button x:Name="StartTaskButton" Content="{DynamicResource Button_StartTask_Content_Start}" HorizontalAlignment="Right" Height="50" Margin="0, 0, 20, 20" VerticalAlignment="Bottom" Width="100" FontSize="16" Click="StartTaskAsync" Style="{DynamicResource FlatButton}"/>
         <ProgressBar x:Name="TaskProgressBar" HorizontalAlignment="Right" Height="5" Margin="0, 0, 20, 20" VerticalAlignment="Bottom" Width="100" BorderBrush="#0000" Foreground="DimGray" Visibility="Hidden"/>
-        <GroupBox Header="{DynamicResource GroupBox_ImputFiles_Header}" Margin="20, 20, 260, 240">
+        <Grid x:Name="TaskSettings">
+            <GroupBox Header="{DynamicResource GroupBox_ImputFiles_Header}" Margin="20, 20, 260, 240">
             <Grid>
                 <ListBox x:Name="FilesList" Margin="5" AllowDrop="True" Drop="FilesList_Drop" SelectionMode="Extended" DragOver="FilesList_DragOver"/>
                 <Grid Panel.ZIndex="1" Opacity="0.75">
@@ -22,7 +23,7 @@
                 </Grid>
             </Grid>
         </GroupBox>
-        <GroupBox Header="{DynamicResource GroupBox_Command_Header}" Margin="20, 0, 260, 20" Height="210" VerticalAlignment="Bottom">
+            <GroupBox Header="{DynamicResource GroupBox_Command_Header}" Margin="20, 0, 260, 20" Height="210" VerticalAlignment="Bottom">
             <Grid>
                 <TextBlock Height="20" Margin="5, 5, 5, 0" Text="{DynamicResource TextBlock_AppPath_Text}" VerticalAlignment="Top"/>
                 <TextBox x:Name="AppPath"  Height="20" Margin="5, 25, 24, 0" VerticalAlignment="Top" Text="" PreviewDragOver="AppPath_PreviewDragOver" PreviewDrop="AppPath_PreviewDrop"/>
@@ -46,7 +47,7 @@
                 </Menu>
             </Grid>
         </GroupBox>
-        <GroupBox Header="{DynamicResource GroupBox_Output_Header}" Margin="0, 20, 20, 240" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
+            <GroupBox Header="{DynamicResource GroupBox_Output_Header}" Margin="0, 20, 20, 240" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
             <Grid>
                 <TextBlock Height="20" Margin="5, 5, 110, 0" Text="{DynamicResource TextBlock_OutputExtension_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
                 <TextBox x:Name="OutputExtension" Height="20" Margin="0, 5, 5, 0" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" GotFocus="OutputExtension_GotFocus" PreviewMouseDown="OutputExtension_PreviewMouseDown"/>
@@ -61,7 +62,7 @@
                 <TextBlock Height="20" Margin="5, 80, 5, 0" TextWrapping="Wrap" Text="{DynamicResource TextBlock_OutputConfigTips_Text}" VerticalAlignment="Top" TextAlignment="Right" Foreground="#FF707070" FontSize="10"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="{DynamicResource GroupBox_Process_Header}" Margin="0, 0, 20, 90" VerticalAlignment="Bottom" Height="140" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
+            <GroupBox Header="{DynamicResource GroupBox_Process_Header}" Margin="0, 0, 20, 90" VerticalAlignment="Bottom" Height="140" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
             <Grid>
                 <TextBlock Height="20" Margin="5, 5, 110, 0" Text="{DynamicResource TextBlock_Priority_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
                 <ComboBox x:Name="Priority" SelectedValuePath="Tag" Margin="0, 5, 5, 0" VerticalAlignment="Top" Height="20" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
@@ -103,7 +104,7 @@
                 </ComboBox>
             </Grid>
         </GroupBox>
-        <GroupBox x:Name="Monitor" Header="{DynamicResource GroupBox_Monitor_Header}" Height="60" Margin="0, 0, 130, 20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="120">
+            <GroupBox x:Name="Monitor" Header="{DynamicResource GroupBox_Monitor_Header}" Height="60" Margin="0, 0, 130, 20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="120">
             <Grid>
                 <TextBlock HorizontalAlignment="Left" Height="15" Margin="2, 5, 0, 0" Text="{DynamicResource TextBlock_MonitorForCPU_Text}" VerticalAlignment="Top" Width="30" FontSize="10" TextAlignment="Right"/>
                 <TextBlock x:Name="MonitorForCPU" Height="15" Margin="34, 5, 2, 0" Text="--%" VerticalAlignment="Top" FontSize="10"/>
@@ -112,5 +113,6 @@
                 <TextBlock x:Name="MonitorForRAM" Height="15" Margin="34, 20, 2, 0" Text="----KB (--%)" VerticalAlignment="Top" FontSize="10"/>
             </Grid>
         </GroupBox>
+        </Grid>
     </Grid>
 </Window>
