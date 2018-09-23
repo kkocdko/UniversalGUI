@@ -57,10 +57,6 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 * 在**所有CPU都已占满**时，`Process.Start();`需要很长时间，因此可能难以达到所指定的线程数。
 
-### Todo
-
-* 添加“强制停止”功能。
-
 ### Bugs
 
 * Combo Box只有“收起”时才能看到Pressed效果。
