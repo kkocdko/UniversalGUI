@@ -56,20 +56,21 @@ public class IniManager
     }
 
     /// <summary>
-    /// Read key
+    /// Read ini key
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
     /// <returns>Read value</returns>
     public string Read(string section, string key)
     {
-        StringBuilder strBuilder = new StringBuilder(1024);
+        var strBuilder = new StringBuilder(1024);
         GetPrivateProfileString(section, key, "", strBuilder, 1024, IniFile);
-        return strBuilder.ToString();
+        string readValue = strBuilder.ToString();
+        return readValue;
     }
 
     /// <summary>
-    /// Write key
+    /// Write ini key
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
@@ -80,7 +81,7 @@ public class IniManager
     }
 
     /// <summary>
-    /// Write key
+    /// Write ini key
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
@@ -92,7 +93,7 @@ public class IniManager
     }
 
     /// <summary>
-    /// Write key
+    /// Write ini key
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
@@ -104,7 +105,7 @@ public class IniManager
     }
 
     /// <summary>
-    /// Write key
+    /// Write ini key
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
@@ -116,7 +117,7 @@ public class IniManager
     }
 
     /// <summary>
-    /// Delete key
+    /// Delete ini key
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
@@ -126,7 +127,7 @@ public class IniManager
     }
 
     /// <summary>
-    /// Delete section
+    /// Delete ini section
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>

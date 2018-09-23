@@ -9,12 +9,12 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <!--Themes-->
-                <ResourceDictionary Source="Resources\Themes\Flat.xaml"/>
+                <ResourceDictionary Source="Resources\Theme\Flat.xaml"/>
 
                 <!--Languages-->
-                <ResourceDictionary Source="Resources\Languages\zh-CN.xaml"/>
-                <ResourceDictionary Source="Resources\Languages\zh-TW.xaml"/>
-                <ResourceDictionary Source="Resources\Languages\en-US.xaml"/>
+                <ResourceDictionary Source="Resources\Language\zh-CN.xaml"/>
+                <ResourceDictionary Source="Resources\Language\zh-TW.xaml"/>
+                <ResourceDictionary Source="Resources\Language\en-US.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

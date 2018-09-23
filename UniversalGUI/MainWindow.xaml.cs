@@ -21,12 +21,14 @@ namespace UniversalGUI
     //Core
     public partial class MainWindow : Window
     {
-        private Config config = new Config();
+        private Config config;
+
+        private int[] processesId;
 
         public async void StartTaskAsync()
         {
             //Stop task
-            if(TaskProgressBar.Visibility == Visibility.Visible)
+            if (TaskProgressBar.Visibility == Visibility.Visible)
             {
                 StopTask();
                 return;
@@ -40,16 +42,17 @@ namespace UniversalGUI
             //Collect config on UI
             SumConfig();
             bool settingLegal = CheckConfig();
-            
+
             //Run on background thread
             await Task.Run(() =>
             {
                 if (settingLegal == true)
                 {
                     Task[] tasks = new Task[config.ThreadNumber];
+                    processesId = new int[config.ThreadNumber];
                     for (int i = 0; i < tasks.Length; i++)
                     {
-                        tasks[i] = NewThreadAsync();
+                        tasks[i] = NewThreadAsync(i);
                     }
                     Task.WaitAll(tasks);
                 }
@@ -75,44 +78,73 @@ namespace UniversalGUI
 
         public void StopTask()
         {
-            config = new Config();
+            Dispatcher.Invoke(() =>
+            {
+                config.FilesList = new LinkedList<string>();
+                foreach (var pid in processesId)
+                {
+                    try
+                    {
+                        Process.GetProcessById(pid).Kill();
+                    }
+                    catch (System.ArgumentException)
+                    {
+                        Debug.WriteLine("The process [" + pid + "] isn't running.");
+                    }
+                    catch (System.ComponentModel.Win32Exception)
+                    {
+                        MessageBox.Show("Can't kill the process [" + pid + "] . You can try again.");
+                    }
+                }
+            });
         }
 
-        public async Task NewThreadAsync()
+        public async Task NewThreadAsync(int processNumber)
         {
             while (config.FilesList.Count > 0)
             {
                 string inputFile = Dispatcher.Invoke(() =>
                 {
-                    string firstFile = config.FilesList.First.Value;
-                    config.FilesList.RemoveFirst();
-                    return firstFile;
+                    if (config.FilesList.Count > 0)
+                    {
+                        string firstFile = config.FilesList.First.Value;
+                        config.FilesList.RemoveFirst();
+                        return firstFile;
+                    }
+                    else
+                    {
+                        return "";
+                    }
                 });
 
-                string appArgs = SumAppArgs(
-                    argsTemplet: config.ArgsTemplet,
-                    inputFile: inputFile,
-                    userArgs: config.UserArgs,
-                    outputSuffix: config.OutputSuffix,
-                    outputExtension: config.OutputExtension,
-                    outputFloder: config.OutputFloder);
-                
-                await Task.Run(() =>
+                if (inputFile != "")
                 {
-                    NewProcess(
-                        appPath: config.AppPath,
-                        appArgs: appArgs,
-                        windowStyle: config.WindowStyle,
-                        priority: config.Priority,
-                        simulateCmd: config.SimulateCmd);
-                });
+                    string appArgs = SumAppArgs(
+                        argsTemplet: config.ArgsTemplet,
+                        inputFile: inputFile,
+                        userArgs: config.UserArgs,
+                        outputSuffix: config.OutputSuffix,
+                        outputExtension: config.OutputExtension,
+                        outputFloder: config.OutputFloder);
 
-                config.CompletedFileNum++;
+                    await Task.Run(() =>
+                    {
+                        NewProcess(
+                            appPath: config.AppPath,
+                            appArgs: appArgs,
+                            windowStyle: config.WindowStyle,
+                            priority: config.Priority,
+                            simulateCmd: config.SimulateCmd,
+                            processNumber: processNumber);
+                    });
 
-                Dispatcher.Invoke(() =>
-                {
-                    SetProgress((double)config.CompletedFileNum / config.FilesSum);
-                });
+                    config.CompletedFileNum++;
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        SetProgress((double)config.CompletedFileNum / config.FilesSum);
+                    });
+                }
             }
         }
 
@@ -191,7 +223,7 @@ namespace UniversalGUI
             return args;
         }
 
-        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd)
+        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd, int processNumber)
         {
             var process = new Process();
             if (simulateCmd == false)
@@ -204,11 +236,6 @@ namespace UniversalGUI
                 process.StartInfo.FileName = "cmd.exe";
                 process.StartInfo.Arguments = "/c" + " " + appPath + " " + appArgs; //这边不能给appPath加引号
             }
-
-            Debug.WriteLine(process.StartInfo.Arguments);
-            //int id = process.Id;
-            //Process.GetProcessById(999999).Kill();
-            //Process.GetCurrentProcess().Kill();
 
             switch (windowStyle)
             {
@@ -229,13 +256,9 @@ namespace UniversalGUI
             try
             {
                 process.Start();
+                processesId[processNumber] = process.Id;
             }
             catch (System.ComponentModel.Win32Exception e)
-            {
-                Debug.WriteLine(e.ToString());
-                return;
-            }
-            catch (System.InvalidOperationException e)
             {
                 Debug.WriteLine(e.ToString());
                 return;
@@ -268,7 +291,7 @@ namespace UniversalGUI
 
         private void SumConfig()
         {
-            config = new Config(); //直接new一个，省的整天重置这重置那的
+            config = new Config();
             Dispatcher.Invoke(() =>
             {
                 foreach (var item in FilesList.Items)
@@ -340,11 +363,11 @@ namespace UniversalGUI
                 dictionaryList.Add(dictionary);
             }
             string culture = Thread.CurrentThread.CurrentCulture.ToString();
-            string requestedCulture = string.Format(@"Resources\Languages\{0}.xaml", culture);
+            string requestedCulture = string.Format(@"Resources\Language\{0}.xaml", culture);
             var resourceDictionary = dictionaryList.FirstOrDefault(d => d.Source.OriginalString.Equals(requestedCulture));
             if (resourceDictionary == null)
             {
-                requestedCulture = @"Resources\Languages\en-US.xaml";
+                requestedCulture = @"Resources\Language\en-US.xaml";
                 resourceDictionary = dictionaryList.FirstOrDefault(d => d.Source.OriginalString.Equals(requestedCulture));
             }
             Application.Current.Resources.MergedDictionaries.Remove(resourceDictionary);
@@ -393,7 +416,7 @@ namespace UniversalGUI
             }
             else
             {
-                Title = DefaultTitle + " [" + suffix + "] ";
+                Title = DefaultTitle + " - " + suffix;
             }
         }
 
@@ -690,7 +713,11 @@ namespace UniversalGUI
     {
         private string IniConfigFileName = "Config.ini";
 
-        private string IniConfigFileVersion = "0.7.7.2"; //这是配置文件的版本，不是程序版本
+        /// <summary>
+        ///这是配置文件的版本，不是程序版本
+        ///只要配置文件原有关键字不变，就无需更新配置文件版本
+        /// </summary>
+        private string IniConfigFileVersion = "0.7.7.2";
 
         private IniManager IniConfigManager;
 
@@ -721,6 +748,7 @@ namespace UniversalGUI
                         this.Width = Convert.ToDouble(windowWidth);
                         string windowHeight = ini.Read("Window", "Height");
                         this.Height = Convert.ToDouble(windowHeight);
+
                         AppPath.Text = ini.Read("Command", "AppPath");
                         ArgsTemplet.Text = ini.Read("Command", "ArgsTemplet");
                         UserArgs.Text = ini.Read("Command", "UserArgs");
@@ -728,14 +756,17 @@ namespace UniversalGUI
                         OutputSuffix.Text = ini.Read("Output", "Suffix");
                         OutputFloder.Text = ini.Read("Output", "Floder");
                         Priority.SelectedValue = ini.Read("Process", "Priority");
+
                         uint threadNumber = Convert.ToUInt32(ini.Read("Process", "ThreadNumber"));
                         if (threadNumber > 8)
                         {
                             CustomThreadNumber(threadNumber, updateTextBox: true);
                         }
                         ThreadNumber.SelectedValue = threadNumber;
+
                         CUIWindowStyle.SelectedValue = ini.Read("Process", "WindowStyle");
                         SimulateCmd.SelectedValue = ini.Read("Process", "SimulateCmd");
+
                         string culture = ini.Read("Language", "Culture");
                         if (culture != "")
                         {
@@ -803,8 +834,6 @@ namespace UniversalGUI
         public LinkedList<string> FilesList = new LinkedList<string>();
         public int FilesSum = 0;
         public int CompletedFileNum = 0;
-
-        public LinkedList<int> runningProcessesID = new LinkedList<int>();
 
         public string AppPath;
         public string ArgsTemplet;

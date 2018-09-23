@@ -35,6 +35,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>MainIcon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -78,19 +81,19 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Resources\Languages\en-US.xaml">
+    <Page Include="Resources\Language\en-US.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Resources\Languages\zh-CN.xaml">
+    <Page Include="Resources\Language\zh-CN.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Resources\Languages\zh-TW.xaml">
+    <Page Include="Resources\Language\zh-TW.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Resources\Themes\Flat.xaml">
+    <Page Include="Resources\Theme\Flat.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -121,6 +124,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Library\Microsoft.WindowsAPICodePack.dll" />
     <EmbeddedResource Include="Resources\Library\Microsoft.WindowsAPICodePack.Shell.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="MainIcon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
