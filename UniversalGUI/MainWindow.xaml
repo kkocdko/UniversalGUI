@@ -14,105 +14,105 @@
         <ProgressBar x:Name="TaskProgressBar" HorizontalAlignment="Right" Height="5" Margin="0, 0, 20, 20" VerticalAlignment="Bottom" Width="100" BorderBrush="#0000" Foreground="DimGray" Visibility="Hidden"/>
         <Grid x:Name="TaskSettings">
             <GroupBox Header="{DynamicResource GroupBox_ImputFiles_Header}" Margin="20, 20, 260, 240">
-            <Grid>
-                <ListBox x:Name="FilesList" Margin="5" AllowDrop="True" Drop="FilesList_Drop" SelectionMode="Extended" DragOver="FilesList_DragOver"/>
-                <Grid Panel.ZIndex="1" Opacity="0.75">
-                    <Button Content="{DynamicResource Button_AddFiles_Content}" HorizontalAlignment="Right" Height="25" Margin="0, 0, 140, 10" VerticalAlignment="Bottom" Width="60" Click="AddFilesListItems" Style="{DynamicResource FlatButton}"/>
-                    <Button Content="{DynamicResource Button_RemoveFiles_Content}" HorizontalAlignment="Right" Height="25" Margin="0, 0, 75, 10" VerticalAlignment="Bottom" Width="60" Click="RemoveFilesListItems" Style="{DynamicResource FlatButton}"/>
-                    <Button Content="{DynamicResource Button_EmptyFiles_Content}" HorizontalAlignment="Right" Height="25" Margin="0, 0, 10, 10" VerticalAlignment="Bottom" Width="60" Click="EmptyFilesList" Style="{DynamicResource FlatButton}"/>
+                <Grid>
+                    <ListBox x:Name="FilesList" Margin="5" AllowDrop="True" Drop="FilesList_Drop" SelectionMode="Extended" DragOver="FilesList_DragOver"/>
+                    <Grid Panel.ZIndex="1" Opacity="0.75">
+                        <Button Content="{DynamicResource Button_AddFiles_Content}" HorizontalAlignment="Right" Height="25" Margin="0, 0, 140, 10" VerticalAlignment="Bottom" Width="60" Click="AddFilesListItems" Style="{DynamicResource FlatButton}"/>
+                        <Button Content="{DynamicResource Button_RemoveFiles_Content}" HorizontalAlignment="Right" Height="25" Margin="0, 0, 75, 10" VerticalAlignment="Bottom" Width="60" Click="RemoveFilesListItems" Style="{DynamicResource FlatButton}"/>
+                        <Button Content="{DynamicResource Button_EmptyFiles_Content}" HorizontalAlignment="Right" Height="25" Margin="0, 0, 10, 10" VerticalAlignment="Bottom" Width="60" Click="EmptyFilesList" Style="{DynamicResource FlatButton}"/>
+                    </Grid>
                 </Grid>
-            </Grid>
-        </GroupBox>
+            </GroupBox>
             <GroupBox Header="{DynamicResource GroupBox_Command_Header}" Margin="20, 0, 260, 20" Height="210" VerticalAlignment="Bottom">
-            <Grid>
-                <TextBlock Height="20" Margin="5, 5, 5, 0" Text="{DynamicResource TextBlock_AppPath_Text}" VerticalAlignment="Top"/>
-                <TextBox x:Name="AppPath"  Height="20" Margin="5, 25, 24, 0" VerticalAlignment="Top" Text="" PreviewDragOver="AppPath_PreviewDragOver" PreviewDrop="AppPath_PreviewDrop"/>
-                <Button Content="..." HorizontalAlignment="Right" Height="20" Margin="0, 25, 5, 0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="SwitchAppPath" Style="{DynamicResource FlatButton}" Panel.ZIndex="1" />
+                <Grid>
+                    <TextBlock Height="20" Margin="5, 5, 5, 0" Text="{DynamicResource TextBlock_AppPath_Text}" VerticalAlignment="Top"/>
+                    <TextBox x:Name="AppPath"  Height="20" Margin="5, 25, 24, 0" VerticalAlignment="Top" Text="" PreviewDragOver="AppPath_PreviewDragOver" PreviewDrop="AppPath_PreviewDrop"/>
+                    <Button Content="..." HorizontalAlignment="Right" Height="20" Margin="0, 25, 5, 0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="SwitchAppPath" Style="{DynamicResource FlatButton}" Panel.ZIndex="1" />
 
-                <TextBlock Height="20" Margin="5, 55, 5, 0" Text="{DynamicResource TextBlock_ArgsTemplet_Text}" VerticalAlignment="Top"/>
-                <TextBox x:Name="ArgsTemplet" Height="20" Margin="5, 75, 24, 0" VerticalAlignment="Top" Text="{}{UserParameters} {InputFile} {OutputFile}"/>
-                <Button Content="?" HorizontalAlignment="Right" Height="20" Margin="0, 75, 5, 0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="ShowArgsTempletHelp" Style="{DynamicResource FlatButton}" Panel.ZIndex="1" Visibility="Hidden" />
+                    <TextBlock Height="20" Margin="5, 55, 5, 0" Text="{DynamicResource TextBlock_ArgsTemplet_Text}" VerticalAlignment="Top"/>
+                    <TextBox x:Name="ArgsTemplet" Height="20" Margin="5, 75, 24, 0" VerticalAlignment="Top" Text="{}{UserParameters} {InputFile} {OutputFile}"/>
+                    <Button Content="?" HorizontalAlignment="Right" Height="20" Margin="0, 75, 5, 0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="ShowArgsTempletHelp" Style="{DynamicResource FlatButton}" Panel.ZIndex="1" Visibility="Hidden" />
 
-                <TextBlock Height="20" Margin="5, 105, 5, 0" Text="{DynamicResource TextBlock_UserArgs_Text}" VerticalAlignment="Top"/>
-                <TextBox x:Name="UserArgs" Margin="5, 125, 5, 5" TextWrapping="Wrap"/>
-                <Menu HorizontalAlignment="Right" Height="20" VerticalAlignment="Top" Width="20" Margin="0, 75, 5, 0">
-                    <MenuItem Header=">" Height="20" Width="20" Background="#FFF7F7F7" BorderBrush="#FF999999" Foreground="#FF7F7F7F">
-                        <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_Header_InsertMark}" Foreground="Black">
-                            <MenuItem Header="{}{UserParameters}" Click="InsertArgsTempletMark_UserParameters"/>
-                            <MenuItem Header="{}{InputFile}" Click="InsertArgsTempletMark_InputFile"/>
-                            <MenuItem Header="{}{OutputFile}" Click="InsertArgsTempletMark_OutputFile"/>
+                    <TextBlock Height="20" Margin="5, 105, 5, 0" Text="{DynamicResource TextBlock_UserArgs_Text}" VerticalAlignment="Top"/>
+                    <TextBox x:Name="UserArgs" Margin="5, 125, 5, 5" TextWrapping="Wrap"/>
+                    <Menu HorizontalAlignment="Right" Height="20" VerticalAlignment="Top" Width="20" Margin="0, 75, 5, 0">
+                        <MenuItem Header=">" Height="20" Width="20" Background="#FFF7F7F7" BorderBrush="#FF999999" Foreground="#FF7F7F7F">
+                            <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_Header_InsertMark}" Foreground="Black">
+                                <MenuItem Header="{}{UserParameters}" Click="InsertArgsTempletMark_UserParameters"/>
+                                <MenuItem Header="{}{InputFile}" Click="InsertArgsTempletMark_InputFile"/>
+                                <MenuItem Header="{}{OutputFile}" Click="InsertArgsTempletMark_OutputFile"/>
+                            </MenuItem>
+                            <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_Header_Help}" Click="ShowArgsTempletHelp" Foreground="Black"/>
                         </MenuItem>
-                        <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_Header_Help}" Click="ShowArgsTempletHelp" Foreground="Black"/>
-                    </MenuItem>
-                </Menu>
-            </Grid>
-        </GroupBox>
+                    </Menu>
+                </Grid>
+            </GroupBox>
             <GroupBox Header="{DynamicResource GroupBox_Output_Header}" Margin="0, 20, 20, 240" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
-            <Grid>
-                <TextBlock Height="20" Margin="5, 5, 110, 0" Text="{DynamicResource TextBlock_OutputExtension_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
-                <TextBox x:Name="OutputExtension" Height="20" Margin="0, 5, 5, 0" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" GotFocus="OutputExtension_GotFocus" PreviewMouseDown="OutputExtension_PreviewMouseDown"/>
+                <Grid>
+                    <TextBlock Height="20" Margin="5, 5, 110, 0" Text="{DynamicResource TextBlock_OutputExtension_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
+                    <TextBox x:Name="OutputExtension" Height="20" Margin="0, 5, 5, 0" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" GotFocus="OutputExtension_GotFocus" PreviewMouseDown="OutputExtension_PreviewMouseDown"/>
 
-                <TextBlock Height="20" Margin="5, 30, 110, 0" Text="{DynamicResource TextBlock_OutputSuffix_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
-                <TextBox x:Name="OutputSuffix" Height="20" Margin="0, 30, 5, 0" Text="_Output" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" PreviewMouseDown="OutputSuffix_PreviewMouseDown" GotFocus="OutputSuffix_GotFocus"/>
+                    <TextBlock Height="20" Margin="5, 30, 110, 0" Text="{DynamicResource TextBlock_OutputSuffix_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
+                    <TextBox x:Name="OutputSuffix" Height="20" Margin="0, 30, 5, 0" Text="_Output" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100" PreviewMouseDown="OutputSuffix_PreviewMouseDown" GotFocus="OutputSuffix_GotFocus"/>
 
-                <TextBlock Height="20" Margin="5, 55, 110, 0" Text="{DynamicResource TextBlock_OutputFloder_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
-                <TextBox x:Name="OutputFloder" Height="20" Margin="0, 55, 24, 0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="81" PreviewDragOver="OutputFloder_PreviewDragOver" PreviewDrop="OutputFloder_PreviewDrop"/>
-                <Button Content="..." HorizontalAlignment="Right" Height="20" Margin="0, 55, 5, 0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="SwitchOutputFloder" Style="{DynamicResource FlatButton}" Panel.ZIndex="-4"/>
+                    <TextBlock Height="20" Margin="5, 55, 110, 0" Text="{DynamicResource TextBlock_OutputFloder_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
+                    <TextBox x:Name="OutputFloder" Height="20" Margin="0, 55, 24, 0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="81" PreviewDragOver="OutputFloder_PreviewDragOver" PreviewDrop="OutputFloder_PreviewDrop"/>
+                    <Button Content="..." HorizontalAlignment="Right" Height="20" Margin="0, 55, 5, 0" VerticalAlignment="Top" Width="20" Foreground="#FF7F7F7F" Click="SwitchOutputFloder" Style="{DynamicResource FlatButton}" Panel.ZIndex="-4"/>
 
-                <TextBlock Height="20" Margin="5, 80, 5, 0" TextWrapping="Wrap" Text="{DynamicResource TextBlock_OutputConfigTips_Text}" VerticalAlignment="Top" TextAlignment="Right" Foreground="#FF707070" FontSize="10"/>
-            </Grid>
-        </GroupBox>
+                    <TextBlock Height="20" Margin="5, 80, 5, 0" TextWrapping="Wrap" Text="{DynamicResource TextBlock_OutputConfigTips_Text}" VerticalAlignment="Top" TextAlignment="Right" Foreground="#FF707070" FontSize="10"/>
+                </Grid>
+            </GroupBox>
             <GroupBox Header="{DynamicResource GroupBox_Process_Header}" Margin="0, 0, 20, 90" VerticalAlignment="Bottom" Height="140" Width="230" HorizontalAlignment="Right" Grid.ColumnSpan="2">
-            <Grid>
-                <TextBlock Height="20" Margin="5, 5, 110, 0" Text="{DynamicResource TextBlock_Priority_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
-                <ComboBox x:Name="Priority" SelectedValuePath="Tag" Margin="0, 5, 5, 0" VerticalAlignment="Top" Height="20" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
-                    <ComboBoxItem Tag="6" Content="{DynamicResource ComboBoxItem_Priority_RealTime_Content}"/>
-                    <ComboBoxItem Tag="5" Content="{DynamicResource ComboBoxItem_Priority_High_Content}"/>
-                    <ComboBoxItem Tag="4" Content="{DynamicResource ComboBoxItem_Priority_AboveNormal_Content}"/>
-                    <ComboBoxItem Tag="3" Content="{DynamicResource ComboBoxItem_Priority_Normal_Content}" IsSelected="True"/>
-                    <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_Priority_BelowNormal_Content}"/>
-                    <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_Priority_Idle_Content}"/>
-                </ComboBox>
+                <Grid>
+                    <TextBlock Height="20" Margin="5, 5, 110, 0" Text="{DynamicResource TextBlock_Priority_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
+                    <ComboBox x:Name="Priority" SelectedValuePath="Tag" Margin="0, 5, 5, 0" VerticalAlignment="Top" Height="20" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
+                        <ComboBoxItem Tag="6" Content="{DynamicResource ComboBoxItem_Priority_RealTime_Content}"/>
+                        <ComboBoxItem Tag="5" Content="{DynamicResource ComboBoxItem_Priority_High_Content}"/>
+                        <ComboBoxItem Tag="4" Content="{DynamicResource ComboBoxItem_Priority_AboveNormal_Content}"/>
+                        <ComboBoxItem Tag="3" Content="{DynamicResource ComboBoxItem_Priority_Normal_Content}" IsSelected="True"/>
+                        <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_Priority_BelowNormal_Content}"/>
+                        <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_Priority_Idle_Content}"/>
+                    </ComboBox>
 
-                <TextBlock Height="20" Margin="5, 30, 110, 0" Text="{DynamicResource TextBlock_ThreadNumber_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
-                <ComboBox x:Name="ThreadNumber" SelectedValuePath="Tag" Margin="0, 30, 5, 0" VerticalAlignment="Top" Height="20" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
-                    <ComboBoxItem Tag="1" Content="1" IsSelected="True"/>
-                    <ComboBoxItem Tag="2" Content="2"/>
-                    <ComboBoxItem Tag="3" Content="3"/>
-                    <ComboBoxItem Tag="4" Content="4"/>
-                    <ComboBoxItem Tag="5" Content="5"/>
-                    <ComboBoxItem Tag="6" Content="6"/>
-                    <ComboBoxItem Tag="7" Content="7"/>
-                    <ComboBoxItem Tag="8" Content="8"/>
-                    <ComboBoxItem x:Name="CustomThreadNumberItem" Tag="0">
-                        <TextBox x:Name="CustomThreadNumberTextBox" TextChanged="CustomThreadNumberTextBox_TextChanged" MinWidth="30" Margin="-3, -1, 0, 0" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                    </ComboBoxItem>
-                </ComboBox>
+                    <TextBlock Height="20" Margin="5, 30, 110, 0" Text="{DynamicResource TextBlock_ThreadNumber_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
+                    <ComboBox x:Name="ThreadNumber" SelectedValuePath="Tag" Margin="0, 30, 5, 0" VerticalAlignment="Top" Height="20" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
+                        <ComboBoxItem Tag="1" Content="1" IsSelected="True"/>
+                        <ComboBoxItem Tag="2" Content="2"/>
+                        <ComboBoxItem Tag="3" Content="3"/>
+                        <ComboBoxItem Tag="4" Content="4"/>
+                        <ComboBoxItem Tag="5" Content="5"/>
+                        <ComboBoxItem Tag="6" Content="6"/>
+                        <ComboBoxItem Tag="7" Content="7"/>
+                        <ComboBoxItem Tag="8" Content="8"/>
+                        <ComboBoxItem x:Name="CustomThreadNumberItem" Tag="0">
+                            <TextBox x:Name="CustomThreadNumberTextBox" TextChanged="CustomThreadNumberTextBox_TextChanged" MinWidth="30" Margin="-3, -1, 0, 0" BorderBrush="{x:Null}" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                        </ComboBoxItem>
+                    </ComboBox>
 
-                <TextBlock Height="20" Margin="5, 55, 110, 0" Text="{DynamicResource TextBlock_WindowStyle_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
-                <ComboBox x:Name="CUIWindowStyle" SelectedValuePath="Tag" Height="20" Margin="0, 55, 5, 0" VerticalAlignment="Top" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
-                    <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Hidden_Content}" IsSelected="True"/>
-                    <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Minimized_Content}"/>
-                    <ComboBoxItem Tag="3" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Normal_Content}"/>
-                    <ComboBoxItem Tag="4" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Maximized_Content}"/>
-                </ComboBox>
+                    <TextBlock Height="20" Margin="5, 55, 110, 0" Text="{DynamicResource TextBlock_WindowStyle_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
+                    <ComboBox x:Name="CUIWindowStyle" SelectedValuePath="Tag" Height="20" Margin="0, 55, 5, 0" VerticalAlignment="Top" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
+                        <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Hidden_Content}" IsSelected="True"/>
+                        <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Minimized_Content}"/>
+                        <ComboBoxItem Tag="3" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Normal_Content}"/>
+                        <ComboBoxItem Tag="4" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Maximized_Content}"/>
+                    </ComboBox>
 
-                <TextBlock Height="20" Margin="5, 80, 110, 0" Text="{DynamicResource TextBlock_SimulateCmd_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
-                <ComboBox x:Name="SimulateCmd" SelectedValuePath="Tag" Height="20" Margin="0, 80, 5, 0" VerticalAlignment="Top" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
-                    <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_Disabled_Content}" IsSelected="True"/>
-                    <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_Enabled_Content}"/>
-                </ComboBox>
-            </Grid>
-        </GroupBox>
+                    <TextBlock Height="20" Margin="5, 80, 110, 0" Text="{DynamicResource TextBlock_SimulateCmd_Text}" VerticalAlignment="Top" TextAlignment="Right"/>
+                    <ComboBox x:Name="SimulateCmd" SelectedValuePath="Tag" Height="20" Margin="0, 80, 5, 0" VerticalAlignment="Top" Style="{DynamicResource FlatComboBox}" HorizontalAlignment="Right" Width="100">
+                        <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_Disabled_Content}" IsSelected="True"/>
+                        <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_Enabled_Content}"/>
+                    </ComboBox>
+                </Grid>
+            </GroupBox>
             <GroupBox x:Name="Monitor" Header="{DynamicResource GroupBox_Monitor_Header}" Height="60" Margin="0, 0, 130, 20" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="120">
-            <Grid>
-                <TextBlock HorizontalAlignment="Left" Height="15" Margin="2, 5, 0, 0" Text="{DynamicResource TextBlock_MonitorForCPU_Text}" VerticalAlignment="Top" Width="30" FontSize="10" TextAlignment="Right"/>
-                <TextBlock x:Name="MonitorForCPU" Height="15" Margin="34, 5, 2, 0" Text="--%" VerticalAlignment="Top" FontSize="10"/>
+                <Grid>
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="2, 5, 0, 0" Text="{DynamicResource TextBlock_MonitorForCPU_Text}" VerticalAlignment="Top" Width="30" FontSize="10" TextAlignment="Right"/>
+                    <TextBlock x:Name="MonitorForCPU" Height="15" Margin="34, 5, 2, 0" Text="--%" VerticalAlignment="Top" FontSize="10"/>
 
-                <TextBlock HorizontalAlignment="Left" Height="15" Margin="2, 20, 0, 0" Text="{DynamicResource TextBlock_MonitorForRAM_Text}" VerticalAlignment="Top" Width="30" FontSize="10" TextAlignment="Right"/>
-                <TextBlock x:Name="MonitorForRAM" Height="15" Margin="34, 20, 2, 0" Text="----KB (--%)" VerticalAlignment="Top" FontSize="10"/>
-            </Grid>
-        </GroupBox>
+                    <TextBlock HorizontalAlignment="Left" Height="15" Margin="2, 20, 0, 0" Text="{DynamicResource TextBlock_MonitorForRAM_Text}" VerticalAlignment="Top" Width="30" FontSize="10" TextAlignment="Right"/>
+                    <TextBlock x:Name="MonitorForRAM" Height="15" Margin="34, 20, 2, 0" Text="----KB (--%)" VerticalAlignment="Top" FontSize="10"/>
+                </Grid>
+            </GroupBox>
         </Grid>
     </Grid>
 </Window>

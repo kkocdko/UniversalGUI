@@ -23,7 +23,7 @@ namespace UniversalGUI
     {
         private Config config;
 
-        private int[] processesId;
+        private int[] processIdArr;
 
         public async void StartTaskAsync()
         {
@@ -49,7 +49,7 @@ namespace UniversalGUI
                 if (settingLegal == true)
                 {
                     Task[] tasks = new Task[config.ThreadNumber];
-                    processesId = new int[config.ThreadNumber];
+                    processIdArr = new int[config.ThreadNumber];
                     for (int i = 0; i < tasks.Length; i++)
                     {
                         tasks[i] = NewThreadAsync(i);
@@ -73,7 +73,7 @@ namespace UniversalGUI
             await Task.Delay(3000); //Show result to user
             StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Start");
             TaskProgressBar.Visibility = Visibility.Hidden;
-            SetProgress(); //擦屁股
+            SetProgress(); //Reset progress
         }
 
         public void StopTask()
@@ -81,19 +81,20 @@ namespace UniversalGUI
             Dispatcher.Invoke(() =>
             {
                 config.FilesList = new LinkedList<string>();
-                foreach (var pid in processesId)
+                for (int i = 0; i < processIdArr.Length; i++)
                 {
                     try
                     {
-                        Process.GetProcessById(pid).Kill();
+                        Process.GetProcessById(processIdArr[i]).Kill();
+                        processIdArr[i] = 0;
                     }
-                    catch (System.ArgumentException)
+                    catch (System.ArgumentException e)
                     {
-                        Debug.WriteLine("The process [" + pid + "] isn't running.");
+                        Debug.WriteLine("Maybe the process [" + processIdArr[i] + "] isn't running. Exception message: {0}", e.Message);
                     }
-                    catch (System.ComponentModel.Win32Exception)
+                    catch (System.ComponentModel.Win32Exception e)
                     {
-                        MessageBox.Show("Can't kill the process [" + pid + "] . You can try again.");
+                        MessageBox.Show("Can't kill the process [" + processIdArr[i] + "] . You can try again. Exception message: {0}", e.Message);
                     }
                 }
             });
@@ -101,7 +102,7 @@ namespace UniversalGUI
 
         public async Task NewThreadAsync(int processNumber)
         {
-            while (config.FilesList.Count > 0)
+            while (true)
             {
                 string inputFile = Dispatcher.Invoke(() =>
                 {
@@ -113,11 +114,15 @@ namespace UniversalGUI
                     }
                     else
                     {
-                        return "";
+                        return null;
                     }
                 });
 
-                if (inputFile != "")
+                if (inputFile == null)
+                {
+                    break;
+                }
+                else
                 {
                     string appArgs = SumAppArgs(
                         argsTemplet: config.ArgsTemplet,
@@ -135,7 +140,7 @@ namespace UniversalGUI
                             windowStyle: config.WindowStyle,
                             priority: config.Priority,
                             simulateCmd: config.SimulateCmd,
-                            processNumber: processNumber);
+                            processIndex: processNumber);
                     });
 
                     config.CompletedFileNum++;
@@ -223,7 +228,7 @@ namespace UniversalGUI
             return args;
         }
 
-        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd, int processNumber)
+        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd, int processIndex)
         {
             var process = new Process();
             if (simulateCmd == false)
@@ -256,11 +261,11 @@ namespace UniversalGUI
             try
             {
                 process.Start();
-                processesId[processNumber] = process.Id;
+                processIdArr[processIndex] = process.Id;
             }
             catch (System.ComponentModel.Win32Exception e)
             {
-                Debug.WriteLine(e.ToString());
+                Debug.WriteLine("The process can not be started. Exception message: {0}", e.Message);
                 return;
             }
 
@@ -296,7 +301,7 @@ namespace UniversalGUI
             {
                 foreach (var item in FilesList.Items)
                 {
-                    config.FilesList.AddLast(Convert.ToString(item)); //把文件添加到链表底部
+                    config.FilesList.AddLast(Convert.ToString(item)); //Add file into list's bottom.
                 }
                 config.FilesSum = FilesList.Items.Count;
                 config.AppPath = AppPath.Text;
@@ -326,8 +331,10 @@ namespace UniversalGUI
     {
         public MainWindow()
         {
-            LoadResoureDll.RegistDLL(); //导入引用的DLL
+            LoadResoureDll.RegistDLL();
+
             InitializeComponent();
+
             DefaultTitle = this.Title;
             IniConfigManager = new IniManager(GetIniConfigFile());
             ImputIniConfig(IniConfigManager);
@@ -497,9 +504,12 @@ namespace UniversalGUI
             }
             else if (OutputFloder.Text == "" && OutputExtension.Text == "" && OutputSuffix.Text == "")
             {
-                string content = QueryLangDict("MessageBox_Content_CheckConfig_OutputSettingsIsConflicting");
-                MessageBox.Show(content, title);
-                return false;
+                string content = QueryLangDict("MessageBox_Content_CheckConfig_OutputSettingsIsDangerous");
+                var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    return false;
+                }
             }
             else if (CustomThreadNumberItem.IsSelected == true)
             {
@@ -714,10 +724,9 @@ namespace UniversalGUI
         private string IniConfigFileName = "Config.ini";
 
         /// <summary>
-        ///这是配置文件的版本，不是程序版本
-        ///只要配置文件原有关键字不变，就无需更新配置文件版本
+        /// This is the config file's version, not app version.
         /// </summary>
-        private string IniConfigFileVersion = "0.7.7.2";
+        private const string IniConfigFileVersion = "0.7.7.2";
 
         private IniManager IniConfigManager;
 

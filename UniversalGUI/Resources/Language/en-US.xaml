@@ -3,7 +3,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:UniversalGUI.Resource.Languages"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
-    
+
     <sys:String x:Key="Window_MainWindow_Title">Universal GUI</sys:String>
     <sys:String x:Key="Window_MainWindow_Title_Suffix_Error">Error</sys:String>
     <sys:String x:Key="Window_MainWindow_Title_Suffix_Finished">Finish</sys:String>
@@ -42,7 +42,7 @@
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Minimized_Content">Minimized</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Normal_Content">Normal</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Maximized_Content">Maximized</sys:String>
-    <sys:String x:Key="TextBlock_SimulateCmd_Text">Simulate cmd</sys:String>
+    <sys:String x:Key="TextBlock_SimulateCmd_Text">Simulate cmd:</sys:String>
     <sys:String x:Key="ComboBoxItem_Disabled_Content">Disabled</sys:String>
     <sys:String x:Key="ComboBoxItem_Enabled_Content">Enabled</sys:String>
     <sys:String x:Key="GroupBox_Monitor_Header">Monitor</sys:String>
@@ -56,7 +56,7 @@
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_CreatNewOne">Existing configfile's version is not supported.Want you delete it and creat a new one?</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_FileslistIsEmpty">Please add file into fileslist.</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_CommandAppIsUnspecified">Please input command application's path.</sys:String>
-    <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsConflicting">If you want to output into source floder, in output extension and suffix, you need to fill in at least one.</sys:String>
+    <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsDangerous">Are you sure you want to export the original file name to the original folder? This may overwrite the original file!</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_ThreadNumberIsIllegal">Thread number is illegal.</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_SimulateCmdConfigIsIllegal">If CMD simulate is enabled, the path to the source program cannot contain spaces.</sys:String>
 </ResourceDictionary>

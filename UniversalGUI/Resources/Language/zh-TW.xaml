@@ -42,7 +42,7 @@
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Minimized_Content">最小化</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Normal_Content">正常</sys:String>
     <sys:String x:Key="ComboBoxItem_CUIWindowStyle_Maximized_Content">最大化</sys:String>
-    <sys:String x:Key="TextBlock_SimulateCmd_Text">模擬cmd</sys:String>
+    <sys:String x:Key="TextBlock_SimulateCmd_Text">模擬cmd:</sys:String>
     <sys:String x:Key="ComboBoxItem_Disabled_Content">已啓用</sys:String>
     <sys:String x:Key="ComboBoxItem_Enabled_Content">已禁用</sys:String>
     <sys:String x:Key="GroupBox_Monitor_Header">資源監視</sys:String>
@@ -56,7 +56,7 @@
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_CreatNewOne">設定檔的版本不受支持。你想要删除它然後創建一個新的嗎？</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_FileslistIsEmpty">請添加檔案到檔案清單。</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_CommandAppIsUnspecified">請輸入命令列應用程序的路徑。</sys:String>
-    <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsConflicting">如果你想要輸出到原資料夾，那麼在拓展名和尾碼之中，至少要填寫一個。</sys:String>
+    <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsDangerous">你確定要以原文件名輸出到原文件夾嗎？這可能覆蓋原文件！</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_ThreadNumberIsIllegal">線程數量不合規。</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_SimulateCmdConfigIsIllegal">如果啟用了CMD模擬，那麼源程序的路徑中不能含有空格。</sys:String>
 </ResourceDictionary>
