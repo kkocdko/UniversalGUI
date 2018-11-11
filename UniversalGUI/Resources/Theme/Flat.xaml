@@ -61,15 +61,14 @@
 
     <!--FlatComboBox-->
     <SolidColorBrush x:Key="ComboBox.Static.Glyph" Color="#999"/>
-    <SolidColorBrush x:Key="ComboBox.Static.Background" Color="White"/>
+    <SolidColorBrush x:Key="ComboBox.Static.Background" Color="#fff"/>
     <SolidColorBrush x:Key="ComboBox.Static.Border" Color="#999"/>
     <SolidColorBrush x:Key="ComboBox.MouseOver.Border" Color="#666"/>
-    <SolidColorBrush x:Key="ComboBox.Pressed.Background" Color="#CCC"/>
-    <SolidColorBrush x:Key="ComboBox.Pressed.Border" Color="#666"/>
-    <SolidColorBrush x:Key="ComboBox.Disabled.Background" Color="#EEE"/>
-    <SolidColorBrush x:Key="ComboBox.Disabled.Border" Color="#EEE"/>
+    <SolidColorBrush x:Key="ComboBox.Checked.Border" Color="#666"/>
+    <SolidColorBrush x:Key="ComboBox.Disabled.Background" Color="#eee"/>
+    <SolidColorBrush x:Key="ComboBox.Disabled.Border" Color="#eee"/>
     <SolidColorBrush x:Key="ComboBox.Disabled.Foreground" Color="#838383"/>
-    <SolidColorBrush x:Key="TextBox.Static.Background" Color="White"/>
+    <SolidColorBrush x:Key="TextBox.Static.Background" Color="#fff"/>
     <Style x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
         <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="IsTabStop" Value="false"/>
@@ -93,11 +92,10 @@
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
-                                <Condition Binding="{Binding IsPressed, RelativeSource={RelativeSource Self}}" Value="true"/>
+                                <Condition Binding="{Binding IsChecked, RelativeSource={RelativeSource Self}}" Value="true"/>
                                 <Condition Binding="{Binding IsEditable, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}" Value="false"/>
                             </MultiDataTrigger.Conditions>
-                            <Setter Property="Background" TargetName="templateRoot" Value="{StaticResource ComboBox.Pressed.Background}"/>
-                            <Setter Property="BorderBrush" TargetName="templateRoot" Value="{StaticResource ComboBox.Pressed.Border}"/>
+                            <Setter Property="BorderBrush" TargetName="templateRoot" Value="{StaticResource ComboBox.Checked.Border}"/>
                         </MultiDataTrigger>
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>

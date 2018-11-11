@@ -85,32 +85,35 @@ namespace UniversalGUI
                 {
                     try
                     {
-                        Process.GetProcessById(processIdArr[i]).Kill();
-                        processIdArr[i] = 0;
+                        if(processIdArr[i] != -1)
+                        {
+                            Process.GetProcessById(processIdArr[i]).Kill();
+                        }
+                        processIdArr[i] = -1;
                     }
                     catch (System.ArgumentException e)
                     {
-                        Debug.WriteLine("Maybe the process [" + processIdArr[i] + "] isn't running. Exception message: {0}", e.Message);
+                        Debug.WriteLine("Maybe the process [" + processIdArr[i] + "] isn't running. Exception message: " + e.Message);
                     }
                     catch (System.ComponentModel.Win32Exception e)
                     {
-                        MessageBox.Show("Can't kill the process [" + processIdArr[i] + "] . You can try again. Exception message: {0}", e.Message);
+                        MessageBox.Show("Can't kill the process [" + processIdArr[i] + "] . You can try again. Exception message: " + e.Message);
                     }
                 }
             });
         }
 
-        public async Task NewThreadAsync(int processNumber)
+        public async Task NewThreadAsync(int processIDIndex)
         {
             while (true)
             {
-                string inputFile = Dispatcher.Invoke(() =>
+                string inputFileName = Dispatcher.Invoke(() =>
                 {
                     if (config.FilesList.Count > 0)
                     {
-                        string firstFile = config.FilesList.First.Value;
+                        string firstFileName = config.FilesList.First.Value;
                         config.FilesList.RemoveFirst();
-                        return firstFile;
+                        return firstFileName;
                     }
                     else
                     {
@@ -118,45 +121,44 @@ namespace UniversalGUI
                     }
                 });
 
-                if (inputFile == null)
+                if (inputFileName == null)
                 {
-                    break;
+                    return;
                 }
-                else
+
+                string appArgs = SumAppArgs(
+                    argsTemplet: config.ArgsTemplet,
+                    inputFileName: inputFileName,
+                    userArgs: config.UserArgs,
+                    outputSuffix: config.OutputSuffix,
+                    outputExtension: config.OutputExtension,
+                    outputFloder: config.OutputFloder);
+
+
+                Process process = NewProcess(
+                    appPath: config.AppPath,
+                    appArgs: appArgs,
+                    windowStyle: config.WindowStyle,
+                    priority: config.Priority,
+                    simulateCmd: config.SimulateCmd);
+
+                processIdArr[processIDIndex] = process.Id;
+
+                await Task.Run(() => process.WaitForExit());
+
+                config.CompletedFileNumber++;
+
+                Dispatcher.Invoke(() =>
                 {
-                    string appArgs = SumAppArgs(
-                        argsTemplet: config.ArgsTemplet,
-                        inputFile: inputFile,
-                        userArgs: config.UserArgs,
-                        outputSuffix: config.OutputSuffix,
-                        outputExtension: config.OutputExtension,
-                        outputFloder: config.OutputFloder);
-
-                    await Task.Run(() =>
-                    {
-                        NewProcess(
-                            appPath: config.AppPath,
-                            appArgs: appArgs,
-                            windowStyle: config.WindowStyle,
-                            priority: config.Priority,
-                            simulateCmd: config.SimulateCmd,
-                            processIndex: processNumber);
-                    });
-
-                    config.CompletedFileNum++;
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        SetProgress((double)config.CompletedFileNum / config.FilesSum);
-                    });
-                }
+                    SetProgress((double)config.CompletedFileNumber / config.FilesSum);
+                });
             }
         }
 
-        private string SumAppArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
+        private string SumAppArgs(string argsTemplet, string inputFileName, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
             //去前后引号
-            inputFile = new Regex("(^\")|(\"$)").Replace(inputFile, "");
+            inputFileName = new Regex("(^\")|(\"$)").Replace(inputFileName, "");
             argsTemplet = new Regex("(^\")|(\"$)").Replace(argsTemplet, "");
             outputSuffix = new Regex("(^\")|(\"$)").Replace(outputSuffix, "");
             outputExtension = new Regex("(^\")|(\"$)").Replace(outputExtension, "");
@@ -173,7 +175,7 @@ namespace UniversalGUI
             //替换 {InputFile}
             {
                 //加前后引号
-                string inputFile2 = "\"" + inputFile + "\"";
+                string inputFile2 = "\"" + inputFileName + "\"";
                 //替换模板中的标记
                 args = new Regex(@"\{InputFile\}").Replace(args, inputFile2);
             }
@@ -182,7 +184,7 @@ namespace UniversalGUI
             {
                 string outputFile;
                 //获得主文件名
-                string mainName = new Regex(@"\..[^.]+?$").Replace(inputFile, "");
+                string mainName = new Regex(@"\..[^.]+?$").Replace(inputFileName, "");
 
                 //后缀
                 if (outputSuffix != "")
@@ -200,7 +202,7 @@ namespace UniversalGUI
                 else
                 {
                     //原拓展名
-                    var sourceExtension = new Regex(@"\..[^.]+?$").Match(inputFile);
+                    var sourceExtension = new Regex(@"\..[^.]+?$").Match(inputFileName);
                     extension = Convert.ToString(sourceExtension);
                 }
                 //去除拓展名前的点
@@ -228,7 +230,7 @@ namespace UniversalGUI
             return args;
         }
 
-        private void NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd, int processIndex)
+        private Process NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd)
         {
             var process = new Process();
             if (simulateCmd == false)
@@ -261,12 +263,11 @@ namespace UniversalGUI
             try
             {
                 process.Start();
-                processIdArr[processIndex] = process.Id;
             }
             catch (System.ComponentModel.Win32Exception e)
             {
                 Debug.WriteLine("The process can not be started. Exception message: {0}", e.Message);
-                return;
+                return null;
             }
 
             process.PriorityBoostEnabled = false;
@@ -291,7 +292,8 @@ namespace UniversalGUI
                     process.PriorityClass = ProcessPriorityClass.RealTime;
                     break;
             }
-            process.WaitForExit();
+
+            return process;
         }
 
         private void SumConfig()
@@ -326,7 +328,7 @@ namespace UniversalGUI
         }
     }
 
-    //Start and Exit
+    //On Start and Exit
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -443,33 +445,32 @@ namespace UniversalGUI
                     cpuUseRatio = Math.Round(cpuPerformanceCounter.NextValue());
                     usedMem = (double)computerInfo.TotalPhysicalMemory - computerInfo.AvailablePhysicalMemory;
                     memUseRatio = Math.Round((double)usedMem / computerInfo.TotalPhysicalMemory * 100);
-
                     //按需切换占用内存大小的显示单位及精度
-                    if (usedMem >= 1099511627776) //占用内存>=1TB
+                    if (usedMem >= 1099511627776) //1TB
                     {
                         memUnit = "TB";
-                        usedMem /= 1099511627776; //1024^4（4次方）
+                        usedMem /= 1099511627776; //1024^4
                         usedMem = Math.Round(usedMem, 3);
                     }
-                    else if (usedMem >= 107374182400) //>=100GB
+                    else if (usedMem >= 107374182400) //100GB
                     {
                         memUnit = "GB";
                         usedMem /= 1073741824; //^3
                         usedMem = Math.Round(usedMem, 1);
                     }
-                    else if (usedMem >= 10737418240) //>=10GB
+                    else if (usedMem >= 10737418240) //10GB
                     {
                         memUnit = "GB";
                         usedMem /= 1073741824; //^3
                         usedMem = Math.Round(usedMem, 2);
                     }
-                    else if (usedMem >= 1073741824) //>=1GB
+                    else if (usedMem >= 1073741824) //1GB
                     {
                         memUnit = "GB";
                         usedMem /= 1073741824; //^3
                         usedMem = Math.Round(usedMem, 3);
                     }
-                    else if (usedMem >= 104857600) //>=100MB
+                    else if (usedMem >= 104857600) //100MB
                     {
                         memUnit = "MB";
                         usedMem /= 1048576;//^2
@@ -842,7 +843,7 @@ namespace UniversalGUI
     {
         public LinkedList<string> FilesList = new LinkedList<string>();
         public int FilesSum = 0;
-        public int CompletedFileNum = 0;
+        public int CompletedFileNumber = 0;
 
         public string AppPath;
         public string ArgsTemplet;

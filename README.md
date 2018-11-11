@@ -58,7 +58,3 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 * 可在程序所在目录下新建一个名为`Portable`的文件（无拓展名），让程序把ini配置文件放在所在目录，达到便携化效果。
 
 * 在**所有CPU都已占满**时，`Process.Start();`需要很长时间，因此可能难以达到所指定的线程数。
-
-### Bugs
-
-* Combo Box只有“收起”时才能看到Pressed效果。
