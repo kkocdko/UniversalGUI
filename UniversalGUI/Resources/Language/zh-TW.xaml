@@ -54,6 +54,7 @@
     <sys:String x:Key="MessageBox_Content_Configfile_FormatMistake">設定檔的格式有錯誤：</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_UseBuildInOne">設定檔的版本不受支持。你將會使用內寘配寘。</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_CreatNewOne">設定檔的版本不受支持。你想要删除它然後創建一個新的嗎？</sys:String>
+    <sys:String x:Key="MessageBox_Content_Configfile_CanNotWrite">寫入設定檔失敗，也許你沒有這個目錄的寫入權限。</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_FileslistIsEmpty">請添加檔案到檔案清單。</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_CommandAppIsUnspecified">請輸入命令列應用程序的路徑。</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsDangerous">你確定要以原文件名輸出到原文件夾嗎？這可能覆蓋原文件！</sys:String>

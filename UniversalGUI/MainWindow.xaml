@@ -7,10 +7,10 @@
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2"
         x:Class="UniversalGUI.MainWindow"
         mc:Ignorable="d"
-        Title="{DynamicResource Window_MainWindow_Title}" Height="425" Width="700" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded">
+        Title="{DynamicResource Window_MainWindow_Title}" Height="425" Width="700" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded" Closed="MainWindow_WindowClosed">
 
     <Grid Margin="15">
-        <Button x:Name="StartTaskButton" Content="{DynamicResource Button_StartTask_Content_Start}" HorizontalAlignment="Right" Height="50" Margin="0" VerticalAlignment="Bottom" Width="100" FontSize="16" Click="StartTaskAsync" Style="{DynamicResource FlatButton}"/>
+        <Button x:Name="StartTaskButton" Content="{DynamicResource Button_StartTask_Content_Start}" HorizontalAlignment="Right" Height="50" Margin="0" VerticalAlignment="Bottom" Width="100" FontSize="16" Click="StartTaskButton_Click" Style="{DynamicResource FlatButton}"/>
         <ProgressBar x:Name="TaskProgressBar" HorizontalAlignment="Right" Height="4" Margin="0,0,1,1" VerticalAlignment="Bottom" Width="98" BorderBrush="#0000" Foreground="DimGray" Visibility="Hidden" Background="#0000"/>
         <Grid x:Name="TaskSettings">
             <GroupBox Header="{DynamicResource GroupBox_ImputFiles_Header}" Margin="0,0,240,220">

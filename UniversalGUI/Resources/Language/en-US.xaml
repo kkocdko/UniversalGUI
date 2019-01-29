@@ -54,6 +54,7 @@
     <sys:String x:Key="MessageBox_Content_Configfile_FormatMistake">There is a mistake in the configfile's format:</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_UseBuildInOne">Existing configfile's version is not supported.So you will use built-in config.</sys:String>
     <sys:String x:Key="MessageBox_Content_Configfile_VersionMistake_CreatNewOne">Existing configfile's version is not supported.Want you delete it and creat a new one?</sys:String>
+    <sys:String x:Key="MessageBox_Content_Configfile_CanNotWrite">Write configfile failed, maybe you don't have write access to this directory.</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_FileslistIsEmpty">Please add file into fileslist.</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_CommandAppIsUnspecified">Please input command application's path.</sys:String>
     <sys:String x:Key="MessageBox_Content_CheckConfig_OutputSettingsIsDangerous">Are you sure you want to export the original file name to the original folder? This may overwrite the original file!</sys:String>

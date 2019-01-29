@@ -1,6 +1,6 @@
 ### Introduction
 
-![001](https://s1.ax1x.com/2018/07/26/Pt7lQO.png)
+![001](https://kkocdko.github.io/src/img/20180726-010059-001.webp)
 
 * 此为`0.7.1.1`版本的截图。
 
@@ -10,11 +10,9 @@
 
 * 自动生成参数，省去手动输入文件名的麻烦，达到类似`XnConvert`的带GUI集成转换器的效果。
 
-* 还有很多用处。顾名思义，这是**通用**的GUI外壳，不仅可用于下边举例的LibWebP，也可用于Lame、Guetzli、FFmpeg等。
-
 #### How to Use?
 
-先看源程序的帮助或者`Readme`，了解一下它的参数格式。下边是一个示例（LibWebP-cwebp）：
+先看源程序的帮助或者`readme`，了解一下它的参数格式。下边是一个示例（LibWebP-cwebp）：
 
 ```
 Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
@@ -34,19 +32,19 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 接着在`Universal GUI`的`User arguments`中填入所需的参数，这些文本将替换`{UserParameters}`标记。当然，你也可以直接在`Argument templet`中填入所需参数，不使用`{UserParameters}`标记（这可以适配一些对于输入文件有一些选项，对输出文件又有一些选项，并且这些选项在参数中的位置不连续的程序，例如FFmpeg）。
 
-不过，`这程序的初衷`难道被我忘掉了？当然不。我们可以在`Thread number`这个Combo Box中选择线程数，这将同时运行多个源程序，并进行**异步调度**（多高大上），以充分利用CPU时间。
+可以在`Thread number`这个Combo Box中选择线程数，这将同时运行多个源程序，充分利用CPU时间。
 
-其他的就没啥可说了。添加文件到列表中，给输出文件指定新的拓展名以及添加后缀……凡所应有，无所不有。Enjoy it!
+其他功能按需食用。
 
 ### Contrast
 
-我使用`LibWebP-cwebp`将36张图片转换为WebP格式，使用`-m 6`参数以取得更好的编码效果。
+我使用`LibWebP-cwebp`将36张PNG图片转换为WebP格式，参数`-m 6`。
 
-* `UniversalGUI`版本：`0.7.1.1`
+* `UniversalGUI`：`0.7.1.1`
 
-* `LibWebP`版本：`1.0.0`
+* `LibWebP`：`1.0.0`
 
-* 测试平台：`i3-2310m 2C4T`、`2G DDR3 1333 内存`。
+* `i3-2310m 2C4T`、`2G DDR3 1333`。
 
 |------------------|所用时间|平均CPU利用率|
 |------------------|--------|-------------|
@@ -58,3 +56,5 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 * 可在程序所在目录下新建一个名为`Portable`的文件（无拓展名），让程序把ini配置文件放在所在目录，达到便携化效果。
 
 * 在**所有CPU都已占满**时，`Process.Start();`需要很长时间，因此可能难以达到所指定的线程数。
+
+* 某些命令行操作不能通过给程序加参实现（例如用ffmpeg搭桥到qaac进行音频压制），这时请开启`Simulate cmd`选项，以模拟在cmd中输入命令。

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.WindowsAPICodePack.Taskbar;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -10,7 +12,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Microsoft.WindowsAPICodePack.Taskbar;
 
 namespace UniversalGUI
 {
@@ -23,117 +24,61 @@ namespace UniversalGUI
     {
         private Config config;
 
-        private int[] processIdArr;
+        private int[] processIds;
 
-        public async void StartTaskAsync()
+        public void StartTask()
         {
-            //Stop task
-            if (TaskProgressBar.Visibility == Visibility.Visible)
+            Task[] tasks = new Task[config.ThreadNumber];
+            processIds = new int[config.ThreadNumber];
+            for (int i = 0, l = tasks.Length; i < l; i++)
             {
-                StopTask();
-                return;
+                tasks[i] = NewThreadAsync(i);
             }
-
-            //Change UI
-            TaskSettings.IsEnabled = false;
-            StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Stop");
-            SetProgress(0);
-
-            //Collect config on UI
-            SumConfig();
-            bool settingLegal = CheckConfig();
-
-            //Run on background thread
-            await Task.Run(() =>
-            {
-                if (settingLegal == true)
-                {
-                    Task[] tasks = new Task[config.ThreadNumber];
-                    processIdArr = new int[config.ThreadNumber];
-                    for (int i = 0; i < tasks.Length; i++)
-                    {
-                        tasks[i] = NewThreadAsync(i);
-                    }
-                    Task.WaitAll(tasks);
-                }
-            });
-
-            //Change UI
-            TaskSettings.IsEnabled = true;
-            if (settingLegal == true)
-            {
-                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Finished");
-                SetProgress(1);
-            }
-            else
-            {
-                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Error");
-                SetProgress(-1);
-            }
-            await Task.Delay(3000); //Show result to user
-            StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Start");
-            TaskProgressBar.Visibility = Visibility.Hidden;
-            SetProgress(); //Reset progress
+            Task.WaitAll(tasks);
         }
 
         public void StopTask()
         {
-            Dispatcher.Invoke(() =>
+            if (config == null)
             {
-                config.FilesList = new LinkedList<string>();
-                for (int i = 0; i < processIdArr.Length; i++)
+                return;
+            }
+            config.FilesList = new LinkedList<string>();
+            config.FilesListEnumerator = config.FilesList.GetEnumerator();
+            for (int i = 0, l = processIds.Length; i < l; i++)
+            {
+                try
                 {
-                    try
+                    if (processIds[i] != 0)
                     {
-                        if(processIdArr[i] != -1)
-                        {
-                            Process.GetProcessById(processIdArr[i]).Kill();
-                        }
-                        processIdArr[i] = -1;
+                        Process.GetProcessById(processIds[i]).Kill();
                     }
-                    catch (System.ArgumentException e)
-                    {
-                        Debug.WriteLine("Maybe the process [" + processIdArr[i] + "] isn't running. Exception message: " + e.Message);
-                    }
-                    catch (System.ComponentModel.Win32Exception e)
-                    {
-                        MessageBox.Show("Can't kill the process [" + processIdArr[i] + "] . You can try again. Exception message: " + e.Message);
-                    }
+                    processIds[i] = 0;
                 }
-            });
+                catch (System.ArgumentException e)
+                {
+                    Debug.WriteLine("Maybe the process [" + processIds[i] + "] isn't running. Exception message: " + e.Message);
+                }
+                catch (System.ComponentModel.Win32Exception e)
+                {
+                    MessageBox.Show("Can't kill the process [" + processIds[i] + "] . You can try again. Exception message: " + e.Message);
+                }
+            }
         }
 
-        public async Task NewThreadAsync(int processIDIndex)
+        public async Task NewThreadAsync(int processIdIndex)
         {
-            while (true)
+            while (config.FilesListEnumerator.MoveNext()) // Side effect
             {
-                string inputFileName = Dispatcher.Invoke(() =>
-                {
-                    if (config.FilesList.Count > 0)
-                    {
-                        string firstFileName = config.FilesList.First.Value;
-                        config.FilesList.RemoveFirst();
-                        return firstFileName;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                });
-
-                if (inputFileName == null)
-                {
-                    return;
-                }
+                string currentFileName = (string)config.FilesListEnumerator.Current;
 
                 string appArgs = SumAppArgs(
                     argsTemplet: config.ArgsTemplet,
-                    inputFileName: inputFileName,
+                    inputFileName: currentFileName,
                     userArgs: config.UserArgs,
                     outputSuffix: config.OutputSuffix,
                     outputExtension: config.OutputExtension,
                     outputFloder: config.OutputFloder);
-
 
                 Process process = NewProcess(
                     appPath: config.AppPath,
@@ -142,16 +87,13 @@ namespace UniversalGUI
                     priority: config.Priority,
                     simulateCmd: config.SimulateCmd);
 
-                processIdArr[processIDIndex] = process.Id;
+                processIds[processIdIndex] = process.Id;
 
                 await Task.Run(() => process.WaitForExit());
 
                 config.CompletedFileNumber++;
 
-                Dispatcher.Invoke(() =>
-                {
-                    SetProgress((double)config.CompletedFileNumber / config.FilesSum);
-                });
+                Dispatcher.Invoke(() => SetProgress((double)config.CompletedFileNumber / config.FilesNumber));
             }
         }
 
@@ -241,7 +183,7 @@ namespace UniversalGUI
             else
             {
                 process.StartInfo.FileName = "cmd.exe";
-                process.StartInfo.Arguments = "/c" + " " + appPath + " " + appArgs; //这边不能给appPath加引号
+                process.StartInfo.Arguments = "/c " + appPath + " " + appArgs; // 这边不能给appPath加引号
             }
 
             switch (windowStyle)
@@ -299,36 +241,34 @@ namespace UniversalGUI
         private void SumConfig()
         {
             config = new Config();
-            Dispatcher.Invoke(() =>
+            foreach (var item in FilesList.Items)
             {
-                foreach (var item in FilesList.Items)
-                {
-                    config.FilesList.AddLast(Convert.ToString(item)); //Add file into list's bottom.
-                }
-                config.FilesSum = FilesList.Items.Count;
-                config.AppPath = AppPath.Text;
-                config.ArgsTemplet = ArgsTemplet.Text;
-                config.UserArgs = UserArgs.Text;
-                config.OutputSuffix = OutputSuffix.Text;
-                config.OutputExtension = OutputExtension.Text;
-                config.OutputFloder = OutputFloder.Text;
-                config.Priority = Convert.ToUInt32(Priority.SelectedValue);
-                config.ThreadNumber = Convert.ToUInt32(ThreadNumber.SelectedValue);
-                config.WindowStyle = Convert.ToUInt32(CUIWindowStyle.SelectedValue);
-                switch (Convert.ToUInt32(SimulateCmd.SelectedValue))
-                {
-                    case 1:
-                        config.SimulateCmd = false;
-                        break;
-                    case 2:
-                        config.SimulateCmd = true;
-                        break;
-                }
-            });
+                config.FilesList.AddLast((string)item);
+            }
+            config.FilesListEnumerator = config.FilesList.GetEnumerator();
+            config.FilesNumber = config.FilesList.Count;
+            config.AppPath = AppPath.Text;
+            config.ArgsTemplet = ArgsTemplet.Text;
+            config.UserArgs = UserArgs.Text;
+            config.OutputSuffix = OutputSuffix.Text;
+            config.OutputExtension = OutputExtension.Text;
+            config.OutputFloder = OutputFloder.Text;
+            config.Priority = Convert.ToUInt32(Priority.SelectedValue);
+            config.ThreadNumber = Convert.ToUInt32(ThreadNumber.SelectedValue);
+            config.WindowStyle = Convert.ToUInt32(CUIWindowStyle.SelectedValue);
+            switch (Convert.ToUInt32(SimulateCmd.SelectedValue))
+            {
+                case 1:
+                    config.SimulateCmd = false;
+                    break;
+                case 2:
+                    config.SimulateCmd = true;
+                    break;
+            }
         }
     }
 
-    //On Start and Exit
+    // On start or exit
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -352,9 +292,14 @@ namespace UniversalGUI
         {
             SaveIniConfig(IniConfigManager);
         }
+
+        private void MainWindow_WindowClosed(object sender, EventArgs e)
+        {
+            StopTask();
+        }
     }
 
-    //About UI
+    // About UI
     public partial class MainWindow : Window
     {
         private string DefaultTitle;
@@ -383,11 +328,58 @@ namespace UniversalGUI
             Application.Current.Resources.MergedDictionaries.Add(resourceDictionary);
         }
 
-        private void StartTaskAsync(object sender, RoutedEventArgs e) => StartTaskAsync();
+        private async void StartTaskButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (TaskProgressBar.Visibility == Visibility.Visible)
+            {
+                StopTask();
+                return;
+            }
+            else
+            {
+                // Change UI
+                TaskSettings.IsEnabled = false;
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Stop");
+                SetProgress(0);
+
+                // Collect config
+                SumConfig();
+                bool settingLegal = CheckConfig();
+
+                // Start task
+                await Task.Run(() => StartTask());
+
+                // Change UI
+                TaskSettings.IsEnabled = true;
+                if (settingLegal == true)
+                {
+                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Finished");
+                    SetProgress(1);
+                }
+                else
+                {
+                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Error");
+                    SetProgress(-1);
+                }
+                await Task.Delay(3000); //Show result to user
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Start");
+                TaskProgressBar.Visibility = Visibility.Hidden;
+                SetProgress(); // Reset progress
+            }
+        }
 
         private void SetProgress(double multiple = -2)
         {
-            if (multiple == -2) //重置
+            if (multiple >= 0 && multiple <= 1) // Change
+            {
+                int percent = Convert.ToInt32(Math.Round(multiple * 100));
+                SetTitleSuffix(percent + "%");
+                TaskProgressBar.Value = percent;
+                TaskProgressBar.Visibility = Visibility.Visible;
+                TaskbarManager.Instance.SetProgressValue(percent, 100, this);
+                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal, this);
+            }
+            else if (multiple == -2) // Reset
             {
                 SetTitleSuffix();
                 TaskProgressBar.Value = 0;
@@ -396,7 +388,7 @@ namespace UniversalGUI
                 TaskbarManager.Instance.SetProgressValue(0, 100, this);
                 TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress, this);
             }
-            else if (multiple == -1) //错误警告
+            else if (multiple == -1) // Error warning
             {
                 string suffix = QueryLangDict("Window_MainWindow_Title_Suffix_Error");
                 SetTitleSuffix(suffix);
@@ -406,27 +398,17 @@ namespace UniversalGUI
                 TaskbarManager.Instance.SetProgressValue(100, 100, this);
                 TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error, this);
             }
-            else if (multiple >= 0 && multiple <= 1) //一般修改
+            else
             {
-                int percent = Convert.ToInt32(Math.Round(multiple * 100));
-                SetTitleSuffix(percent + "%");
-                TaskProgressBar.Value = percent;
-                TaskProgressBar.Visibility = Visibility.Visible;
-                TaskbarManager.Instance.SetProgressValue(percent, 100, this);
-                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal, this);
+                throw new ArgumentException();
             }
         }
 
         private void SetTitleSuffix(string suffix = "")
         {
-            if (suffix == "")
-            {
-                Title = DefaultTitle;
-            }
-            else
-            {
-                Title = DefaultTitle + " - " + suffix;
-            }
+            Title = (suffix == "")
+                ? DefaultTitle
+                : DefaultTitle + " - " + suffix;
         }
 
         private async void StartMonitorAsync()
@@ -555,8 +537,7 @@ namespace UniversalGUI
             else
             {
                 var selectedItems = FilesList.SelectedItems;
-                var itemsCount = FilesList.SelectedItems.Count;
-                for (int i = itemsCount - 1; i >= 0; i--)
+                for (int i = selectedItems.Count - 1; i > -1; i--)
                 {
                     FilesList.Items.Remove(selectedItems[i]);
                 }
@@ -719,7 +700,7 @@ namespace UniversalGUI
         }
     }
 
-    //About Ini Config
+    // About Ini Config
     public partial class MainWindow : Window
     {
         private string IniConfigFileName = "Config.ini";
@@ -802,47 +783,58 @@ namespace UniversalGUI
         private void SaveIniConfig(IniManager ini)
         {
             if (File.Exists(ini.IniFile))
+            { }
+            else
             {
-                if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion || File.ReadAllBytes(ini.IniFile).Length == 0)
+                try
                 {
-                    ini.Write("Versions", "ConfigFile", IniConfigFileVersion);
-                    ini.Write("Window", "Width", this.Width);
-                    ini.Write("Window", "Height", this.Height);
-                    ini.Write("Command", "AppPath", AppPath.Text);
-                    ini.Write("Command", "ArgsTemplet", ArgsTemplet.Text);
-                    ini.Write("Command", "UserArgs", UserArgs.Text);
-                    ini.Write("Output", "Extension", OutputExtension.Text);
-                    ini.Write("Output", "Suffix", OutputSuffix.Text);
-                    ini.Write("Output", "Floder", OutputFloder.Text);
-                    ini.Write("Process", "Priority", Priority.SelectedValue);
-                    ini.Write("Process", "ThreadNumber", ThreadNumber.SelectedValue);
-                    ini.Write("Process", "WindowStyle", CUIWindowStyle.SelectedValue);
-                    ini.Write("Process", "SimulateCmd", SimulateCmd.SelectedValue);
+                    ini.CreatFile();
                 }
-                else
+                catch (Exception e)
                 {
-                    string title = QueryLangDict("MessageBox_Title_Hint");
-                    string content = QueryLangDict("MessageBox_Content_Configfile_VersionMistake_CreatNewOne");
-                    var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        ini.CreatFile();
-                        SaveIniConfig(ini);
-                    }
+                    string title = QueryLangDict("MessageBox_Title_Error");
+                    string content = QueryLangDict("MessageBox_Content_Configfile_CanNotWrite");
+                    MessageBox.Show(content, title);
+                    return;
                 }
+            }
+
+            if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion || File.ReadAllBytes(ini.IniFile).Length == 0)
+            {
+                ini.Write("Versions", "ConfigFile", IniConfigFileVersion);
+                ini.Write("Window", "Width", this.Width);
+                ini.Write("Window", "Height", this.Height);
+                ini.Write("Command", "AppPath", AppPath.Text);
+                ini.Write("Command", "ArgsTemplet", ArgsTemplet.Text);
+                ini.Write("Command", "UserArgs", UserArgs.Text);
+                ini.Write("Output", "Extension", OutputExtension.Text);
+                ini.Write("Output", "Suffix", OutputSuffix.Text);
+                ini.Write("Output", "Floder", OutputFloder.Text);
+                ini.Write("Process", "Priority", Priority.SelectedValue);
+                ini.Write("Process", "ThreadNumber", ThreadNumber.SelectedValue);
+                ini.Write("Process", "WindowStyle", CUIWindowStyle.SelectedValue);
+                ini.Write("Process", "SimulateCmd", SimulateCmd.SelectedValue);
             }
             else
             {
-                ini.CreatFile();
-                SaveIniConfig(ini);
+                string title = QueryLangDict("MessageBox_Title_Hint");
+                string content = QueryLangDict("MessageBox_Content_Configfile_VersionMistake_CreatNewOne");
+                var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    ini.CreatFile();
+                    SaveIniConfig(ini);
+                }
             }
+
         }
     }
 
     public class Config
     {
         public LinkedList<string> FilesList = new LinkedList<string>();
-        public int FilesSum = 0;
+        public IEnumerator FilesListEnumerator;
+        public int FilesNumber;
         public int CompletedFileNumber = 0;
 
         public string AppPath;
