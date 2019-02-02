@@ -1,5 +1,4 @@
-﻿using Microsoft.WindowsAPICodePack.Taskbar;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -273,8 +272,6 @@ namespace UniversalGUI
     {
         public MainWindow()
         {
-            LoadResoureDll.RegistDLL();
-
             InitializeComponent();
 
             DefaultTitle = this.Title;
@@ -376,8 +373,8 @@ namespace UniversalGUI
                 SetTitleSuffix(percent + "%");
                 TaskProgressBar.Value = percent;
                 TaskProgressBar.Visibility = Visibility.Visible;
-                TaskbarManager.Instance.SetProgressValue(percent, 100, this);
-                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Normal, this);
+                TaskbarManager.SetProgressValue(percent, 100);
+                TaskbarManager.SetProgressState(TaskbarProgressBarState.Normal);
             }
             else if (multiple == -2) // Reset
             {
@@ -385,8 +382,8 @@ namespace UniversalGUI
                 TaskProgressBar.Value = 0;
                 TaskProgressBar.Foreground = new SolidColorBrush(Colors.DimGray);
                 TaskProgressBar.Visibility = Visibility.Hidden;
-                TaskbarManager.Instance.SetProgressValue(0, 100, this);
-                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress, this);
+                TaskbarManager.SetProgressValue(0, 100);
+                TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress);
             }
             else if (multiple == -1) // Error warning
             {
@@ -395,8 +392,8 @@ namespace UniversalGUI
                 TaskProgressBar.Foreground = new SolidColorBrush(Colors.Red);
                 TaskProgressBar.Value = 100;
                 TaskProgressBar.Visibility = Visibility.Visible;
-                TaskbarManager.Instance.SetProgressValue(100, 100, this);
-                TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error, this);
+                TaskbarManager.SetProgressValue(100, 100);
+                TaskbarManager.SetProgressState(TaskbarProgressBarState.Error);
             }
             else
             {
@@ -790,7 +787,7 @@ namespace UniversalGUI
                 {
                     ini.CreatFile();
                 }
-                catch (Exception e)
+                catch
                 {
                     string title = QueryLangDict("MessageBox_Title_Error");
                     string content = QueryLangDict("MessageBox_Content_Configfile_CanNotWrite");
