@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using System.Windows.Controls;
 
 namespace UniversalGUI
 {
@@ -573,16 +574,17 @@ namespace UniversalGUI
             }
         }
 
-        private void AppPath_PreviewDragOver(object sender, DragEventArgs e)
+        private void DropFileTextBox_PreviewDragOver(object sender, DragEventArgs e)
         {
             e.Effects = DragDropEffects.Copy;
             e.Handled = true;
         }
 
-        private void AppPath_PreviewDrop(object sender, DragEventArgs e)
+        private void DropFileTextBox_PreviewDrop(object senderObj, DragEventArgs e)
         {
+            var sender = (TextBox)senderObj;
             string[] dropFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
-            AppPath.Text = dropFiles[0];
+            sender.Text = dropFiles[0];
         }
 
         private void InsertArgsTempletTag(string tagContent)
@@ -626,73 +628,37 @@ namespace UniversalGUI
                 OutputFloder.Text = folderBrowserDialog.SelectedPath;
             }
         }
-
-        private void OutputFloder_PreviewDragOver(object sender, DragEventArgs e)
+        
+        private void AutoSelectTextBox_PreviewMouseDown(object senderObj, System.Windows.Input.MouseButtonEventArgs e)
         {
-            e.Effects = DragDropEffects.Copy;
-            e.Handled = true;
+            var sender = (TextBox)senderObj;
+            if (!sender.IsFocused)
+            {
+                sender.Focus();
+                e.Handled = true;
+            }
         }
 
-        private void OutputFloder_PreviewDrop(object sender, DragEventArgs e)
+        private void AutoSelectTextBox_GotFocus(object senderObj, RoutedEventArgs e)
         {
-            string[] dropFloders = (string[])e.Data.GetData(DataFormats.FileDrop);
-            OutputFloder.Text = dropFloders[0];
+            var sender = (TextBox)senderObj;
+            sender.SelectAll();
         }
 
-        private void OutputExtension_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void CustomThreadNumberTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            OutputExtension.Focus();
-            e.Handled = true;
-        }
-
-        private void OutputExtension_GotFocus(object sender, RoutedEventArgs e)
-        {
-            OutputExtension.SelectAll();
-        }
-
-        private void OutputSuffix_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            OutputSuffix.Focus();
-            e.Handled = true;
-        }
-
-        private void OutputSuffix_GotFocus(object sender, RoutedEventArgs e)
-        {
-            OutputSuffix.SelectAll();
+            CustomThreadNumberItem.IsSelected = true;
         }
 
         private void CustomThreadNumberTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            uint threadNumber = 0;
             try
             {
-                threadNumber = Convert.ToUInt32(CustomThreadNumberTextBox.Text);
+                Convert.ToUInt32(CustomThreadNumberTextBox.Text);
             }
-            catch (FormatException)
+            catch
             {
-                CustomThreadNumberTextBox.Clear();
-            }
-            catch (OverflowException)
-            {
-                CustomThreadNumberTextBox.Clear();
-            }
-            finally
-            {
-                CustomThreadNumber(threadNumber);
-                CustomThreadNumberTextBox.Focus();
-            }
-        }
-
-        private void CustomThreadNumber(uint threadNumber, bool updateTextBox = false)
-        {
-            CustomThreadNumberItem.Tag = threadNumber;
-            if (threadNumber > 8)
-            {
-                ThreadNumber.SelectedValue = threadNumber;
-            }
-            if (updateTextBox == true)
-            {
-                CustomThreadNumberTextBox.Text = threadNumber.ToString();
+                CustomThreadNumberTextBox.Text = "";
             }
         }
     }
@@ -746,11 +712,13 @@ namespace UniversalGUI
                         Priority.SelectedValue = ini.Read("Process", "Priority");
 
                         uint threadNumber = Convert.ToUInt32(ini.Read("Process", "ThreadNumber"));
+                        ThreadNumber.SelectedValue = threadNumber;
                         if (threadNumber > 8)
                         {
-                            CustomThreadNumber(threadNumber, updateTextBox: true);
+                            CustomThreadNumberTextBox.Text = threadNumber.ToString();
+                            CustomThreadNumberItem.Tag = threadNumber;
+                            CustomThreadNumberItem.IsSelected = true;
                         }
-                        ThreadNumber.SelectedValue = threadNumber;
 
                         CUIWindowStyle.SelectedValue = ini.Read("Process", "WindowStyle");
                         SimulateCmd.SelectedValue = ini.Read("Process", "SimulateCmd");
