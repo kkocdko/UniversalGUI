@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace UniversalGUI
 {
@@ -97,14 +98,24 @@ namespace UniversalGUI
             }
         }
 
+        private void RemoveQuotationMasks(ref string sourceString)
+        {
+            sourceString = new Regex("(^\")|(\"$)").Replace(sourceString, "");
+        }
+
+        private void AddQuotationMasks(ref string sourceString)
+        {
+            sourceString = "\"" + sourceString + "\"";
+        }
+
         private string SumAppArgs(string argsTemplet, string inputFileName, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
-            //去前后引号
-            inputFileName = new Regex("(^\")|(\"$)").Replace(inputFileName, "");
-            argsTemplet = new Regex("(^\")|(\"$)").Replace(argsTemplet, "");
-            outputSuffix = new Regex("(^\")|(\"$)").Replace(outputSuffix, "");
-            outputExtension = new Regex("(^\")|(\"$)").Replace(outputExtension, "");
-            outputFloder = new Regex("(^\")|(\"$)").Replace(outputFloder, "");
+            // Remove quotation mask
+            RemoveQuotationMasks(ref inputFileName);
+            RemoveQuotationMasks(ref argsTemplet);
+            RemoveQuotationMasks(ref outputSuffix);
+            RemoveQuotationMasks(ref outputExtension);
+            RemoveQuotationMasks(ref outputFloder);
 
             string args = argsTemplet;
 
@@ -131,7 +142,7 @@ namespace UniversalGUI
                 //后缀
                 if (outputSuffix != "")
                 {
-                    mainName = mainName + outputSuffix;
+                    mainName += outputSuffix;
                 }
 
                 //拓展名
@@ -158,13 +169,13 @@ namespace UniversalGUI
                     //去路径后正反斜杠
                     outputFloder = new Regex(@"[\\/]$").Replace(outputFloder, "");
                     //加路径后反斜杠
-                    outputFloder = outputFloder + "\\";
+                    outputFloder += "\\";
                     //替换输出路径
                     outputFile = new Regex(@"^.+\\").Replace(outputFile, outputFloder);
                 }
 
                 //加前后引号
-                outputFile = "\"" + outputFile + "\"";
+                AddQuotationMasks(ref outputFile);
                 //替换模板中的标记
                 args = new Regex(@"\{OutputFile\}").Replace(args, outputFile);
             }
@@ -256,15 +267,7 @@ namespace UniversalGUI
             config.Priority = Convert.ToUInt32(Priority.SelectedValue);
             config.ThreadNumber = Convert.ToUInt32(ThreadNumber.SelectedValue);
             config.WindowStyle = Convert.ToUInt32(CUIWindowStyle.SelectedValue);
-            switch (Convert.ToUInt32(SimulateCmd.SelectedValue))
-            {
-                case 1:
-                    config.SimulateCmd = false;
-                    break;
-                case 2:
-                    config.SimulateCmd = true;
-                    break;
-            }
+            config.SimulateCmd = SimulateCmd.SelectedValue.ToString() == "2";
         }
     }
 
@@ -300,7 +303,7 @@ namespace UniversalGUI
     // About UI
     public partial class MainWindow : Window
     {
-        private string DefaultTitle;
+        private readonly string DefaultTitle;
 
         private string QueryLangDict(string key)
         {
@@ -404,7 +407,7 @@ namespace UniversalGUI
 
         private void SetTitleSuffix(string suffix = "")
         {
-            Title = (suffix == "")
+            Title = suffix == ""
                 ? DefaultTitle
                 : DefaultTitle + " - " + suffix;
         }
@@ -629,7 +632,7 @@ namespace UniversalGUI
             }
         }
         
-        private void AutoSelectTextBox_PreviewMouseDown(object senderObj, System.Windows.Input.MouseButtonEventArgs e)
+        private void AutoSelectTextBox_PreviewMouseDown(object senderObj, MouseButtonEventArgs e)
         {
             var sender = (TextBox)senderObj;
             if (!sender.IsFocused)
@@ -650,11 +653,11 @@ namespace UniversalGUI
             CustomThreadNumberItem.IsSelected = true;
         }
 
-        private void CustomThreadNumberTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void CustomThreadNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             try
             {
-                Convert.ToUInt32(CustomThreadNumberTextBox.Text);
+                _ = Convert.ToUInt32(CustomThreadNumberTextBox.Text);
             }
             catch
             {
@@ -666,14 +669,14 @@ namespace UniversalGUI
     // About Ini Config
     public partial class MainWindow : Window
     {
-        private string IniConfigFileName = "Config.ini";
+        private const string IniConfigFileName = "Config.ini";
 
         /// <summary>
         /// This is the config file's version, not app version.
         /// </summary>
         private const string IniConfigFileVersion = "0.7.7.2";
 
-        private IniManager IniConfigManager;
+        private readonly IniManager IniConfigManager;
 
         private string GetIniConfigFile()
         {
@@ -747,9 +750,7 @@ namespace UniversalGUI
 
         private void SaveIniConfig(IniManager ini)
         {
-            if (File.Exists(ini.IniFile))
-            { }
-            else
+            if (!File.Exists(ini.IniFile))
             {
                 try
                 {

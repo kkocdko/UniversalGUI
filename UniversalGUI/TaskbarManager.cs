@@ -28,7 +28,10 @@ public static class TaskbarManager
     /// </summary>
     private static bool IsPlatformSupported
     {
-        get { return Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.CompareTo(new Version(6, 1)) >= 0; }
+        get {
+            return Environment.OSVersion.Platform == PlatformID.Win32NT 
+                && Environment.OSVersion.Version.CompareTo(new Version(6, 1)) >= 0;
+        }
     }
 
     /// <summary>

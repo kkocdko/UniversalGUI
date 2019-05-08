@@ -49,7 +49,7 @@ public class IniManager
     /// <summary>
     /// IniManager constructor
     /// </summary>
-    /// <param name="path">Ini file's full path(Use full path!)</param>
+    /// <param name="path">Ini file's full path</param>
     public IniManager(string path)
     {
         IniFile = path;
@@ -100,7 +100,6 @@ public class IniManager
     /// <param name="value">Write value</param>
     public void Write(string section, string key, object value)
     {
-        string strValue = Convert.ToString(value);
         Write(section, key, Convert.ToString(value));
     }
 
@@ -121,19 +120,9 @@ public class IniManager
     /// </summary>
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
-    public void Delete(string section, string key)
+    public void Delete(string section, string key = null)
     {
         WritePrivateProfileString(section, key, null, IniFile);
-    }
-
-    /// <summary>
-    /// Delete ini section
-    /// </summary>
-    /// <param name="section">Section name</param>
-    /// <param name="key">Key name</param>
-    public void Delete(string section)
-    {
-        WritePrivateProfileString(section, null, null, IniFile);
     }
 
     /// <summary>

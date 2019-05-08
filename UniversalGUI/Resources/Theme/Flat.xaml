@@ -22,7 +22,7 @@
     <SolidColorBrush x:Key="Button.Disabled.Background" Color="#EEE"/>
     <SolidColorBrush x:Key="Button.Disabled.Border" Color="#EEE"/>
     <SolidColorBrush x:Key="Button.Disabled.Foreground" Color="#838383"/>
-    <Style x:Key="FlatButton" TargetType="{x:Type Button}">
+    <Style x:Key="{x:Type Button}" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource Button.Static.Background}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Button.Static.Border}"/>
@@ -222,7 +222,7 @@
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
-    <Style x:Key="FlatComboBox" TargetType="{x:Type ComboBox}">
+    <Style x:Key="{x:Type ComboBox}" TargetType="{x:Type ComboBox}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource ComboBox.Static.Background}"/>
         <Setter Property="BorderBrush" Value="{StaticResource ComboBox.Static.Border}"/>
