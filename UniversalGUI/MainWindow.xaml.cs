@@ -339,7 +339,7 @@ namespace UniversalGUI
             else
             {
                 // Change UI
-                TaskSettings.IsEnabled = false;
+                //TaskSettings.IsEnabled = false;
                 StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Stop");
                 SetProgress(0);
 
@@ -351,7 +351,7 @@ namespace UniversalGUI
                 await Task.Run(() => StartTask());
 
                 // Change UI
-                TaskSettings.IsEnabled = true;
+                //TaskSettings.IsEnabled = true;
                 if (settingLegal == true)
                 {
                     StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Finished");
@@ -417,7 +417,7 @@ namespace UniversalGUI
             await Task.Run(() =>
             {
                 var cpuPerformanceCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-                cpuPerformanceCounter.NextValue(); //调用一下这个方法，避免输出一个“0%”
+                cpuPerformanceCounter.NextValue();
                 double cpuUseRatio;
                 var computerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
                 double usedMem;
@@ -427,8 +427,7 @@ namespace UniversalGUI
                 {
                     cpuUseRatio = Math.Round(cpuPerformanceCounter.NextValue());
                     usedMem = (double)computerInfo.TotalPhysicalMemory - computerInfo.AvailablePhysicalMemory;
-                    memUseRatio = Math.Round((double)usedMem / computerInfo.TotalPhysicalMemory * 100);
-                    //按需切换占用内存大小的显示单位及精度
+                    memUseRatio = Math.Round(usedMem / computerInfo.TotalPhysicalMemory * 100);
                     if (usedMem >= 1099511627776) //1TB
                     {
                         memUnit = "TB";
@@ -462,8 +461,8 @@ namespace UniversalGUI
 
                     Dispatcher.Invoke(() =>
                     {
-                        MonitorForCPU.Text = cpuUseRatio + "%";
-                        MonitorForRAM.Text = usedMem + memUnit + " (" + memUseRatio + "%)";
+                        MonitorForCPU.Content = cpuUseRatio + "%";
+                        MonitorForRAM.Content = usedMem + memUnit + " (" + memUseRatio + "%)";
                     });
 
                     Thread.Sleep(1000);

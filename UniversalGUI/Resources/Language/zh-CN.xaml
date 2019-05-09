@@ -26,7 +26,7 @@
     <sys:String x:Key="TextBlock_OutputExtension_Text">拓展名:</sys:String>
     <sys:String x:Key="TextBlock_OutputSuffix_Text">后缀:</sys:String>
     <sys:String x:Key="TextBlock_OutputFloder_Text">文件夹:</sys:String>
-    <sys:String x:Key="TextBlock_OutputConfigTips_Text">(清空输入框来禁用功能)</sys:String>
+    <sys:String x:Key="TextBlock_OutputConfigTips_Text">(清空输入框以禁用功能)</sys:String>
     <sys:String x:Key="GroupBox_Process_Header">进程设置</sys:String>
     <sys:String x:Key="TextBlock_Priority_Text">优先级:</sys:String>
     <sys:String x:Key="ComboBoxItem_Priority_RealTime_Content">实时</sys:String>
