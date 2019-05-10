@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -28,8 +28,9 @@ public static class TaskbarManager
     /// </summary>
     private static bool IsPlatformSupported
     {
-        get {
-            return Environment.OSVersion.Platform == PlatformID.Win32NT 
+        get
+        {
+            return Environment.OSVersion.Platform == PlatformID.Win32NT
                 && Environment.OSVersion.Version.CompareTo(new Version(6, 1)) >= 0;
         }
     }

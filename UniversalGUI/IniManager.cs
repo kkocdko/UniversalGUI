@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -21,11 +21,11 @@ public class IniManager
     /// <returns></returns>
     [DllImport("kernel32")]
     private static extern int GetPrivateProfileString(
-        string section, 
-        string key, 
-        string value, 
-        StringBuilder cache, 
-        int cacheSize, 
+        string section,
+        string key,
+        string value,
+        StringBuilder cache,
+        int cacheSize,
         string path);
 
     /// <summary>
@@ -38,9 +38,9 @@ public class IniManager
     /// <returns>0：error 1：success</returns>
     [DllImport("kernel32")]
     private static extern long WritePrivateProfileString(
-        string section, 
-        string key, 
-        string value, 
+        string section,
+        string key,
+        string value,
         string path);
     #endregion
 
