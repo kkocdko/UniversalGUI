@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -340,7 +340,7 @@ namespace UniversalGUI
             {
                 // Change UI
                 //TaskSettings.IsEnabled = false;
-                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Stop");
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Stop");
                 SetProgress(0);
 
                 // Collect config
@@ -354,16 +354,16 @@ namespace UniversalGUI
                 //TaskSettings.IsEnabled = true;
                 if (settingLegal == true)
                 {
-                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Finished");
+                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Finished");
                     SetProgress(1);
                 }
                 else
                 {
-                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Error");
+                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Error");
                     SetProgress(-1);
                 }
                 await Task.Delay(3000); //Show result to user
-                StartTaskButton.Content = QueryLangDict("Button_StartTask_Content_Start");
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Start");
                 TaskProgressBar.Visibility = Visibility.Hidden;
                 SetProgress(); // Reset progress
             }
@@ -472,22 +472,22 @@ namespace UniversalGUI
 
         private bool CheckConfig()
         {
-            string title = QueryLangDict("MessageBox_Title_Error");
+            string title = QueryLangDict("Message_Title_Error");
             if (FilesList.Items.Count == 0)
             {
-                string content = QueryLangDict("MessageBox_Content_CheckConfig_FileslistIsEmpty");
+                string content = QueryLangDict("Message_FileslistIsEmpty");
                 MessageBox.Show(content, title);
                 return false;
             }
             else if (AppPath.Text == "")
             {
-                string content = QueryLangDict("MessageBox_Content_CheckConfig_CommandAppIsUnspecified");
+                string content = QueryLangDict("Message_CommandAppUnspecified");
                 MessageBox.Show(content, title);
                 return false;
             }
             else if (OutputFloder.Text == "" && OutputExtension.Text == "" && OutputSuffix.Text == "")
             {
-                string content = QueryLangDict("MessageBox_Content_CheckConfig_OutputSettingsIsDangerous");
+                string content = QueryLangDict("Message_OutputSettingsDangerous");
                 var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.No)
                 {
@@ -498,14 +498,14 @@ namespace UniversalGUI
             {
                 if (Convert.ToInt32(CustomThreadNumberItem.Tag) == 0 || CustomThreadNumberTextBox.Text == "")
                 {
-                    string content = QueryLangDict("MessageBox_Content_CheckConfig_ThreadNumberIsIllegal");
+                    string content = QueryLangDict("Message_ThreadNumberIsIllegal");
                     MessageBox.Show(content, title);
                     return false;
                 }
             }
             else if (AppPath.Text.IndexOf(' ') != -1 && Convert.ToInt32(SimulateCmd.SelectedValue) == 2)
             {
-                string content = QueryLangDict("MessageBox_Content_CheckConfig_SimulateCmdConfigIsIllegal");
+                string content = QueryLangDict("Message_SimulateCmdIsIllegal");
                 MessageBox.Show(content, title);
                 return false;
             }
@@ -617,8 +617,8 @@ namespace UniversalGUI
 
         private void ShowArgsTempletHelp(object sender, RoutedEventArgs e)
         {
-            string title = QueryLangDict("MessageBox_Title_Hint");
-            string content = QueryLangDict("MessageBox_Content_Help_ArgsTemplet");
+            string title = QueryLangDict("Message_Title_Hint");
+            string content = QueryLangDict("Message_ArgsTempletHelp");
             MessageBox.Show(content, title);
         }
 
@@ -630,7 +630,7 @@ namespace UniversalGUI
                 OutputFloder.Text = folderBrowserDialog.SelectedPath;
             }
         }
-        
+
         private void AutoSelectTextBox_PreviewMouseDown(object senderObj, MouseButtonEventArgs e)
         {
             var sender = (TextBox)senderObj;
@@ -733,15 +733,15 @@ namespace UniversalGUI
                     }
                     catch (Exception e)
                     {
-                        string title = QueryLangDict("MessageBox_Title_Error");
-                        string content = QueryLangDict("MessageBox_Content_Configfile_FormatMistake");
+                        string title = QueryLangDict("Message_Title_Error");
+                        string content = QueryLangDict("Message_ConfigfileFormatMistake");
                         MessageBox.Show(content + "\n\n" + e.TargetSite + "\n\n" + e.Message, title);
                     }
                 }
                 else
                 {
-                    string title = QueryLangDict("MessageBox_Title_Hint");
-                    string content = QueryLangDict("MessageBox_Content_Configfile_VersionMistake_UseBuildInOne");
+                    string title = QueryLangDict("Message_Title_Hint");
+                    string content = QueryLangDict("Message_UseBuildInConfigfile");
                     MessageBox.Show(content, title);
                 }
             }
@@ -757,8 +757,8 @@ namespace UniversalGUI
                 }
                 catch
                 {
-                    string title = QueryLangDict("MessageBox_Title_Error");
-                    string content = QueryLangDict("MessageBox_Content_Configfile_CanNotWrite");
+                    string title = QueryLangDict("Message_Title_Error");
+                    string content = QueryLangDict("Message_CanNotWriteConfigfile");
                     MessageBox.Show(content, title);
                     return;
                 }
@@ -782,8 +782,8 @@ namespace UniversalGUI
             }
             else
             {
-                string title = QueryLangDict("MessageBox_Title_Hint");
-                string content = QueryLangDict("MessageBox_Content_Configfile_VersionMistake_CreatNewOne");
+                string title = QueryLangDict("Message_Title_Hint");
+                string content = QueryLangDict("Message_CreatNewConfigfile");
                 var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
