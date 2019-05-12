@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -63,10 +62,10 @@ public class IniManager
     /// <returns>Read value</returns>
     public string Read(string section, string key)
     {
-        var strBuilder = new StringBuilder(1024);
-        GetPrivateProfileString(section, key, "", strBuilder, 1024, IniFile);
-        string readValue = strBuilder.ToString();
-        return readValue;
+        var stringBuilder = new StringBuilder(1024);
+        GetPrivateProfileString(section, key, "", stringBuilder, 1024, IniFile);
+        string value = stringBuilder.ToString();
+        return value;
     }
 
     /// <summary>
@@ -75,44 +74,9 @@ public class IniManager
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
     /// <param name="value">Write value</param>
-    public void Write(string section, string key, string value)
+    public void Write<T>(string section, string key, T value)
     {
-        WritePrivateProfileString(section, key, value, IniFile);
-    }
-
-    /// <summary>
-    /// Write ini key
-    /// </summary>
-    /// <param name="section">Section name</param>
-    /// <param name="key">Key name</param>
-    /// <param name="value">Write value</param>
-    public void Write(string section, string key, double value)
-    {
-        string strValue = Convert.ToString(value);
-        Write(section, key, strValue);
-    }
-
-    /// <summary>
-    /// Write ini key
-    /// </summary>
-    /// <param name="section">Section name</param>
-    /// <param name="key">Key name</param>
-    /// <param name="value">Write value</param>
-    public void Write(string section, string key, object value)
-    {
-        Write(section, key, Convert.ToString(value));
-    }
-
-    /// <summary>
-    /// Write ini key
-    /// </summary>
-    /// <param name="section">Section name</param>
-    /// <param name="key">Key name</param>
-    /// <param name="value">Write value</param>
-    public void Write(string section, string key, bool value)
-    {
-        string strValue = Convert.ToString(value);
-        Write(section, key, strValue);
+        WritePrivateProfileString(section, key, value.ToString(), IniFile);
     }
 
     /// <summary>

@@ -656,7 +656,7 @@ namespace UniversalGUI
         {
             try
             {
-                _ = Convert.ToUInt32(CustomThreadNumberTextBox.Text);
+                Convert.ToUInt32(CustomThreadNumberTextBox.Text);
             }
             catch
             {
