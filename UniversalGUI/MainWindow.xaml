@@ -26,7 +26,7 @@
         <GroupBox Grid.Column="0" Grid.Row="0" Header="{DynamicResource GroupBox_ImputFiles}">
             <Grid>
                 <ListBox x:Name="FilesList" Margin="5" BorderBrush="#22000000" AllowDrop="True" SelectionMode="Extended" Drop="FilesList_Drop" DragOver="FilesList_DragOver"/>
-                <StackPanel Orientation="Horizontal" Height="25" Margin="10" Panel.ZIndex="2" Opacity="0.75" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal" Height="25" Margin="10" Opacity="0.75" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <Button Width="60" Content="{DynamicResource Button_AddFiles}" Click="AddFilesListItems"/>
                     <Button Width="60" Margin="5,0" Content="{DynamicResource Button_RemoveFiles}" Click="RemoveFilesListItems"/>
                     <Button Width="60" Content="{DynamicResource Button_EmptyFiles}" Click="EmptyFilesList"/>
@@ -214,9 +214,9 @@
             </Grid>
         </GroupBox>
 
-        <Grid Grid.Column="4" Grid.Row="4" Margin="9,9,0,1">
-            <Button Content="{DynamicResource Button_StartTask_Start}" x:Name="StartTaskButton" FontSize="16" Click="StartTaskButton_Click" Padding="0"/>
-            <ProgressBar x:Name="TaskProgressBar" Height="4" BorderBrush="#0000" Foreground="DimGray" Background="#0000" VerticalAlignment="Bottom"/>
+        <Grid Grid.Column="4" Grid.Row="4" Margin="11,9,0,1">
+            <Button x:Name="StartTaskButton" FontSize="16" Padding="0" Content="{DynamicResource Button_StartTask_Start}" Click="StartTaskButton_Click"/>
+            <ProgressBar x:Name="TaskProgressBar" Height="5" Margin="1" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="DimGray" VerticalAlignment="Bottom" Visibility="Hidden"/>
         </Grid>
     </Grid>
 </Window>
