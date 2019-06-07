@@ -20,7 +20,7 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 把参数分成几个部分：
 
-* `[-preset <...>] [options]`是可供调整的选项，用`{UserParameters}`标记表示。
+* `[-preset <...>] [options]`是可供调整的选项，用`{UserArg}`标记表示。
 
 * `in_file`是输入文件名，用`{InputFile}`标记表示。
 
@@ -28,9 +28,9 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 * `out_file`是输出文件名，用`{OutputFile}`标记表示。
 
-综上，在`Argument templet`中填入：`{UserParameters} {InputFile} -o {OutputFile}`。请留意在标记之间按需添加空格。
+综上，在`Argument templet`中填入：`{UserArg} {InputFile} -o {OutputFile}`。请留意在标记之间按需添加空格。
 
-接着在`User arguments`中填入所需参数，这将替换`{UserParameters}`标记。当然，你也可以直接在`Argument templet`中填入参数，不使用`{UserParameters}`标记。
+接着在`User arguments`中填入所需参数，这将替换`{UserArg}`标记。当然，你也可以直接在`Argument templet`中填入参数，不使用`{UserArg}`标记。
 
 可以在`Thread count`这个Combo Box中选择线程数。这将同时运行多个源程序，充分利用CPU算力。
 
