@@ -1,6 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,35 +9,30 @@ using System.Windows.Threading;
 
 namespace UniversalGUI
 {
-    public partial class App : Application
-    {
-    }
+    public partial class App : Application { }
 
     public partial class MainWindow : Window
     {
-        private Config config;
+        private FilesConfig filesConfig = new FilesConfig();
 
-        private int[] processIds;
+        private int[] processIds = { };
 
         public void StartTask()
         {
-            Task[] tasks = new Task[config.ThreadNumber];
-            processIds = new int[config.ThreadNumber];
-            for (int i = 0, l = tasks.Length; i < l; i++)
+            ushort threadCount = uiData.ThreadCount;
+            Task[] tasks = new Task[threadCount];
+            processIds = new int[threadCount];
+            for (int i = 0, l = threadCount; i < l; i++)
             {
-                tasks[i] = NewThreadAsync(i);
+                tasks[i] = NewThreadAsync((uint)i);
             }
             Task.WaitAll(tasks);
         }
 
         public void StopTask()
         {
-            if (config == null)
-            {
-                return;
-            }
-            config.FilesList = new LinkedList<string>();
-            config.FilesListEnumerator = config.FilesList.GetEnumerator();
+            filesConfig.FilesList = new LinkedList<string>();
+            filesConfig.FilesListEnumerator = filesConfig.FilesList.GetEnumerator();
             for (int i = 0, l = processIds.Length; i < l; i++)
             {
                 try
@@ -59,34 +54,29 @@ namespace UniversalGUI
             }
         }
 
-        public async Task NewThreadAsync(int processIdIndex)
+        public async Task NewThreadAsync(uint index)
         {
-            while (config.FilesListEnumerator.MoveNext()) // Side effect
+            while (filesConfig.FilesListEnumerator.MoveNext()) // Side effect !
             {
-                string currentFileName = (string)config.FilesListEnumerator.Current;
-
                 string appArgs = SumAppArgs(
-                    argsTemplet: config.ArgsTemplet,
-                    inputFileName: currentFileName,
-                    userArgs: config.UserArgs,
-                    outputSuffix: config.OutputSuffix,
-                    outputExtension: config.OutputExtension,
-                    outputFloder: config.OutputFloder);
-
+                    argsTemplet: uiData.ArgsTemplet,
+                    inputFile: filesConfig.FilesListEnumerator.Current,
+                    userArgs: uiData.UserArgs,
+                    outputSuffix: uiData.OutputSuffix,
+                    outputExtension: uiData.OutputExtension,
+                    outputFloder: uiData.OutputFloder
+                );
                 Process process = NewProcess(
-                    appPath: config.AppPath,
+                    appPath: uiData.AppPath,
                     appArgs: appArgs,
-                    windowStyle: config.WindowStyle,
-                    priority: config.Priority,
-                    simulateCmd: config.SimulateCmd);
-
-                processIds[processIdIndex] = process.Id;
-
+                    windowStyle: uiData.WindowStyle,
+                    priority: uiData.Priority,
+                    simulateCmd: uiData.SimulateCmd
+                );
+                processIds[index] = process.Id;
                 await Task.Run(process.WaitForExit);
-
-                config.CompletedFileNumber++;
-
-                Dispatcher.Invoke(() => SetProgress((double)config.CompletedFileNumber / config.FilesNumber));
+                filesConfig.CompletedFilesCount++;
+                Dispatcher.Invoke(() => SetProgress((double)filesConfig.CompletedFilesCount / filesConfig.FilesCount));
             }
         }
 
@@ -100,10 +90,10 @@ namespace UniversalGUI
             sourceString = "\"" + sourceString + "\"";
         }
 
-        private string SumAppArgs(string argsTemplet, string inputFileName, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
+        private string SumAppArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
             // Remove quotation mask
-            RemoveQuotationMasks(ref inputFileName);
+            RemoveQuotationMasks(ref inputFile);
             RemoveQuotationMasks(ref argsTemplet);
             RemoveQuotationMasks(ref outputSuffix);
             RemoveQuotationMasks(ref outputExtension);
@@ -111,25 +101,25 @@ namespace UniversalGUI
 
             string args = argsTemplet;
 
-            //替换 {UserParameters}
+            //{UserArgs}
             {
                 //替换模板中的标记
-                args = new Regex(@"\{UserParameters\}").Replace(args, userArgs);
+                args = new Regex(@"\{UserArgs\}").Replace(args, userArgs);
             }
 
-            //替换 {InputFile}
+            //{InputFile}
             {
                 //加前后引号
-                string inputFile2 = "\"" + inputFileName + "\"";
+                string inputFile2 = "\"" + inputFile + "\"";
                 //替换模板中的标记
                 args = new Regex(@"\{InputFile\}").Replace(args, inputFile2);
             }
 
-            //替换 {OutputFile}
+            //{OutputFile}
             {
                 string outputFile;
                 //获得主文件名
-                string mainName = new Regex(@"\..[^.]+?$").Replace(inputFileName, "");
+                string mainName = new Regex(@"\..[^.]+?$").Replace(inputFile, "");
 
                 //后缀
                 if (outputSuffix != "")
@@ -147,7 +137,7 @@ namespace UniversalGUI
                 else
                 {
                     //原拓展名
-                    var sourceExtension = new Regex(@"\..[^.]+?$").Match(inputFileName);
+                    var sourceExtension = new Regex(@"\..[^.]+?$").Match(inputFile);
                     extension = Convert.ToString(sourceExtension);
                 }
                 //去除拓展名前的点
@@ -175,10 +165,10 @@ namespace UniversalGUI
             return args;
         }
 
-        private Process NewProcess(string appPath, string appArgs, uint windowStyle, uint priority, bool simulateCmd)
+        private Process NewProcess(string appPath, string appArgs, ushort windowStyle, ushort priority, ushort simulateCmd)
         {
             var process = new Process();
-            if (simulateCmd == false)
+            if (simulateCmd == 1)
             {
                 process.StartInfo.FileName = appPath;
                 process.StartInfo.Arguments = appArgs;
@@ -188,7 +178,6 @@ namespace UniversalGUI
                 process.StartInfo.FileName = "cmd.exe";
                 process.StartInfo.Arguments = "/c " + appPath + " " + appArgs; // 这边不能给appPath加引号
             }
-
             switch (windowStyle)
             {
                 case 1:
@@ -209,7 +198,7 @@ namespace UniversalGUI
             {
                 process.Start();
             }
-            catch (System.ComponentModel.Win32Exception e)
+            catch (Win32Exception e)
             {
                 Debug.WriteLine("The process can not be started. Exception message: {0}", e.Message);
                 return null;
@@ -237,49 +226,26 @@ namespace UniversalGUI
                     process.PriorityClass = ProcessPriorityClass.RealTime;
                     break;
             }
-
             return process;
         }
 
-        private void SumConfig()
+        private void SumFilesConfig()
         {
-            config = new Config();
+            filesConfig = new FilesConfig();
             foreach (var item in FilesList.Items)
             {
-                config.FilesList.AddLast((string)item);
+                filesConfig.FilesList.AddLast((string)item);
             }
-            config.FilesListEnumerator = config.FilesList.GetEnumerator();
-            config.FilesNumber = config.FilesList.Count;
-            config.AppPath = AppPath.Text;
-            config.ArgsTemplet = ArgsTemplet.Text;
-            config.UserArgs = UserArgs.Text;
-            config.OutputSuffix = OutputSuffix.Text;
-            config.OutputExtension = OutputExtension.Text;
-            config.OutputFloder = OutputFloder.Text;
-            config.Priority = Convert.ToUInt32(Priority.SelectedValue);
-            config.ThreadNumber = Convert.ToUInt32(ThreadNumber.SelectedValue);
-            config.WindowStyle = Convert.ToUInt32(CUIWindowStyle.SelectedValue);
-            config.SimulateCmd = SimulateCmd.SelectedValue.ToString() == "2";
+            filesConfig.FilesListEnumerator = filesConfig.FilesList.GetEnumerator();
+            filesConfig.FilesCount = (uint)filesConfig.FilesList.Count;
         }
     }
 
-    public class Config
+    public class FilesConfig
     {
         public LinkedList<string> FilesList = new LinkedList<string>();
-        public IEnumerator FilesListEnumerator;
-        public int FilesNumber;
-        public int CompletedFileNumber = 0;
-
-        public string AppPath;
-        public string ArgsTemplet;
-        public string UserArgs;
-        public string OutputSuffix;
-        public string OutputExtension;
-        public string OutputFloder;
-
-        public uint Priority;
-        public uint ThreadNumber;
-        public uint WindowStyle;
-        public bool SimulateCmd;
+        public IEnumerator<string> FilesListEnumerator;
+        public uint FilesCount;
+        public int CompletedFilesCount = 0;
     }
 }

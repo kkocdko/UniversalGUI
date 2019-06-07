@@ -6,7 +6,11 @@
     xmlns:local="clr-namespace:UniversalGUI"
     x:Class="UniversalGUI.MainWindow"
     mc:Ignorable="d"
-    Title="{DynamicResource Window_MainWindow_Title}" Height="430" Width="650" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded" Closed="MainWindow_WindowClosed">
+    Title="{DynamicResource Window_MainWindow_Title}" Height="430" Width="650" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded">
+
+    <Window.DataContext>
+        <local:MainWindowData/>
+    </Window.DataContext>
 
     <Grid Margin="15">
         <Grid.ColumnDefinitions>
@@ -23,10 +27,10 @@
             <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
 
-        <GroupBox Grid.Column="0" Grid.Row="0" Header="{DynamicResource GroupBox_ImputFiles}">
+        <GroupBox Grid.Column="0" Grid.Row="0" Header="{DynamicResource GroupBox_ImputFiles}" IsEnabled="{Binding ConfigVariable}">
             <Grid>
                 <ListBox x:Name="FilesList" Margin="5" BorderBrush="#22000000" AllowDrop="True" SelectionMode="Extended" Drop="FilesList_Drop" DragOver="FilesList_DragOver"/>
-                <StackPanel Orientation="Horizontal" Height="25" Margin="10" Opacity="0.75" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal" Height="25" Margin="10" Opacity="0.8" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <Button Width="60" Content="{DynamicResource Button_AddFiles}" Click="AddFilesListItems"/>
                     <Button Width="60" Margin="5,0" Content="{DynamicResource Button_RemoveFiles}" Click="RemoveFilesListItems"/>
                     <Button Width="60" Content="{DynamicResource Button_EmptyFiles}" Click="EmptyFilesList"/>
@@ -34,7 +38,7 @@
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="0" Grid.Row="2" Grid.RowSpan="3" Header="{DynamicResource GroupBox_Command}">
+        <GroupBox Grid.Column="0" Grid.Row="2" Grid.RowSpan="3" Header="{DynamicResource GroupBox_Command}" IsEnabled="{Binding ConfigVariable}">
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -60,28 +64,28 @@
                 </Grid.Resources>
 
                 <Label Grid.Column="0" Grid.Row="0" Content="{DynamicResource Label_AppPath}"/>
-                <TextBox Grid.Column="0" Grid.Row="2" x:Name="AppPath" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop"/>
+                <TextBox Grid.Column="0" Grid.Row="2" x:Name="AppPath" Text="{Binding AppPath}" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop"/>
                 <Button Grid.Column="0" Grid.Row="2" Content="..." Width="20" Foreground="#FF7F7F7F" Click="SwitchAppPath" HorizontalAlignment="Right"/>
 
                 <Label Grid.Column="0" Grid.Row="4" Content="{DynamicResource Label_ArgsTemplet}"/>
-                <TextBox Grid.Column="0" Grid.Row="6" x:Name="ArgsTemplet"/>
+                <TextBox Grid.Column="0" Grid.Row="6" x:Name="ArgsTemplet" Text="{Binding ArgsTemplet}"/>
                 <Menu Grid.Column="0" Grid.Row="6" Width="20" HorizontalAlignment="Right">
                     <MenuItem Header=">" Height="20" Width="20" Background="#FFF7F7F7" BorderBrush="#FF999999" Foreground="#FF7F7F7F" Template="{DynamicResource FlatMenuItemControl}">
                         <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_InsertMark}" Foreground="Black">
-                            <MenuItem Header="{}{UserParameters}" Click="InsertArgsTempletMark_UserParameters"/>
-                            <MenuItem Header="{}{InputFile}" Click="InsertArgsTempletMark_InputFile"/>
-                            <MenuItem Header="{}{OutputFile}" Click="InsertArgsTempletMark_OutputFile"/>
+                            <MenuItem Header="{}{UserArgs}" Click="InsertArgsTempletMark"/>
+                            <MenuItem Header="{}{InputFile}" Click="InsertArgsTempletMark"/>
+                            <MenuItem Header="{}{OutputFile}" Click="InsertArgsTempletMark"/>
                         </MenuItem>
                         <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_Help}" Click="ShowArgsTempletHelp" Foreground="Black"/>
                     </MenuItem>
                 </Menu>
 
                 <Label Grid.Column="0" Grid.Row="8" Content="{DynamicResource Label_UserArgs}"/>
-                <TextBox Grid.Column="0" Grid.Row="10" x:Name="UserArgs" TextWrapping="Wrap"/>
+                <TextBox Grid.Column="0" Grid.Row="10" Text="{Binding UserArgs}" TextWrapping="Wrap"/>
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="2" Grid.Row="0" Grid.ColumnSpan="2" Header="{DynamicResource GroupBox_Output}">
+        <GroupBox Grid.Column="2" Grid.Row="0" Grid.ColumnSpan="2" Header="{DynamicResource GroupBox_Output}" IsEnabled="{Binding ConfigVariable}">
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -107,20 +111,20 @@
                 </Grid.Resources>
 
                 <Label Grid.Column="0" Grid.Row="0" Content="{DynamicResource Label_OutputExtension}"/>
-                <TextBox Grid.Column="2" Grid.Row="0" x:Name="OutputExtension" GotFocus="AutoSelectTextBox_GotFocus" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown"/>
+                <TextBox Grid.Column="2" Grid.Row="0" Text="{Binding OutputExtension}" GotFocus="AutoSelectTextBox_GotFocus" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown"/>
 
                 <Label Grid.Column="0" Grid.Row="2" Content="{DynamicResource Label_OutputSuffix}"/>
-                <TextBox Grid.Column="2" Grid.Row="2" x:Name="OutputSuffix" Text="_Output" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown" GotFocus="AutoSelectTextBox_GotFocus"/>
+                <TextBox Grid.Column="2" Grid.Row="2" Text="{Binding OutputSuffix}" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown" GotFocus="AutoSelectTextBox_GotFocus"/>
 
                 <Label Grid.Column="0" Grid.Row="4" Content="{DynamicResource Label_OutputFloder}"/>
-                <TextBox Grid.Column="2" Grid.Row="4" x:Name="OutputFloder" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop" GotFocus="AutoSelectTextBox_GotFocus" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown" Padding="0,0,20,0"/>
+                <TextBox Grid.Column="2" Grid.Row="4" x:Name="OutputFloder" Text="{Binding OutputFloder}" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop" GotFocus="AutoSelectTextBox_GotFocus" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown" Padding="0,0,20,0"/>
                 <Button Grid.Column="2" Grid.Row="4" Content="..." HorizontalAlignment="Right" Width="20" Foreground="#FF7F7F7F" Click="SwitchOutputFloder"/>
 
                 <Label Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" Content="{DynamicResource Label_OutputConfigTips}" Foreground="#FF707070" FontSize="10"/>
             </Grid>
         </GroupBox>
 
-        <GroupBox Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2" Header="{DynamicResource GroupBox_Process}">
+        <GroupBox Grid.Column="2" Grid.Row="2" Grid.ColumnSpan="2" Header="{DynamicResource GroupBox_Process}" IsEnabled="{Binding ConfigVariable}">
             <Grid Margin="5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -146,7 +150,7 @@
                 </Grid.Resources>
 
                 <Label Grid.Column="0" Grid.Row="0" Content="{DynamicResource Label_Priority}"/>
-                <ComboBox Grid.Column="2" Grid.Row="0" x:Name="Priority" SelectedValuePath="Tag">
+                <ComboBox Grid.Column="2" Grid.Row="0" SelectedValue="{Binding Priority}" SelectedValuePath="Tag">
                     <ComboBoxItem Tag="6" Content="{DynamicResource ComboBoxItem_Priority_RealTime}"/>
                     <ComboBoxItem Tag="5" Content="{DynamicResource ComboBoxItem_Priority_High}"/>
                     <ComboBoxItem Tag="4" Content="{DynamicResource ComboBoxItem_Priority_AboveNormal}"/>
@@ -155,8 +159,8 @@
                     <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_Priority_Idle}"/>
                 </ComboBox>
 
-                <Label Grid.Column="0" Grid.Row="2" Content="{DynamicResource Label_ThreadNumber}"/>
-                <ComboBox Grid.Column="2" Grid.Row="2" x:Name="ThreadNumber" SelectedValuePath="Tag">
+                <Label Grid.Column="0" Grid.Row="2" Content="{DynamicResource Label_ThreadCount}"/>
+                <ComboBox Grid.Column="2" Grid.Row="2" x:Name="ThreadCount" SelectedValue="{Binding ThreadCount}" SelectedValuePath="Tag">
                     <ComboBoxItem Tag="1" Content="1" IsSelected="True"/>
                     <ComboBoxItem Tag="2" Content="2"/>
                     <ComboBoxItem Tag="3" Content="3"/>
@@ -171,15 +175,15 @@
                 </ComboBox>
 
                 <Label Grid.Column="0" Grid.Row="4" Content="{DynamicResource Label_WindowStyle}"/>
-                <ComboBox Grid.Column="2" Grid.Row="4" x:Name="CUIWindowStyle" SelectedValuePath="Tag">
-                    <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Hidden}" IsSelected="True"/>
-                    <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Minimized}"/>
-                    <ComboBoxItem Tag="3" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Normal}"/>
-                    <ComboBoxItem Tag="4" Content="{DynamicResource ComboBoxItem_CUIWindowStyle_Maximized}"/>
+                <ComboBox Grid.Column="2" Grid.Row="4" SelectedValue="{Binding WindowStyle}" SelectedValuePath="Tag">
+                    <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_WindowStyle_Hidden}" IsSelected="True"/>
+                    <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_WindowStyle_Minimized}"/>
+                    <ComboBoxItem Tag="3" Content="{DynamicResource ComboBoxItem_WindowStyle_Normal}"/>
+                    <ComboBoxItem Tag="4" Content="{DynamicResource ComboBoxItem_WindowStyle_Maximized}"/>
                 </ComboBox>
 
                 <Label Grid.Column="0" Grid.Row="6" Content="{DynamicResource Label_SimulateCmd}"/>
-                <ComboBox Grid.Column="2" Grid.Row="6" x:Name="SimulateCmd" SelectedValuePath="Tag">
+                <ComboBox Grid.Column="2" Grid.Row="6" SelectedValue="{Binding SimulateCmd}" SelectedValuePath="Tag">
                     <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_Disabled}" IsSelected="True"/>
                     <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_Enabled}"/>
                 </ComboBox>
@@ -206,11 +210,11 @@
                     </Style>
                 </Grid.Resources>
 
-                <Label Grid.Column="0" Grid.Row="0" Content="{DynamicResource Label_MonitorForCPU}" HorizontalContentAlignment="Right"/>
-                <Label Grid.Column="2" Grid.Row="0" x:Name="MonitorForCPU" Content="--%"/>
+                <Label Grid.Column="0" Grid.Row="0" Content="{DynamicResource Label_CpuMonitor}" HorizontalContentAlignment="Right"/>
+                <Label Grid.Column="2" Grid.Row="0" Content="{Binding CpuUsage}"/>
 
-                <Label Grid.Column="0" Grid.Row="1" Content="{DynamicResource Label_MonitorForRAM}" HorizontalContentAlignment="Right"/>
-                <Label Grid.Column="2" Grid.Row="1" x:Name="MonitorForRAM" Content="----KB (--%)"/>
+                <Label Grid.Column="0" Grid.Row="1" Content="{DynamicResource Label_RamMonitor}" HorizontalContentAlignment="Right"/>
+                <Label Grid.Column="2" Grid.Row="1" Content="{Binding RamUsage}"/>
             </Grid>
         </GroupBox>
 

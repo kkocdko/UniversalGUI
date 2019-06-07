@@ -6,19 +6,19 @@
 
 #### What does it do?
 
-* 改善某些命令行程序（图片/音视频编解码器等）在处理较多文件时的**多核利用**问题。
-
 * 自动生成参数，省去手动输入文件名的麻烦，达到类似`XnConvert`的带GUI集成转换器的效果。
+
+* 改善某些命令行程序（图片/音视频编解码器等）在处理较多文件时的**多核利用**问题。
 
 #### How to Use?
 
-先看源程序的帮助或者`readme`，了解一下它的参数格式。下边是一个示例（LibWebP-cwebp）：
+阅读源程序的`README`，了解参数格式。下面是一个示例（LibWebP-cwebp）：
 
 ```
 Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 ```
 
-把参数分成几个部分，如下：
+把参数分成几个部分：
 
 * `[-preset <...>] [options]`是可供调整的选项，用`{UserParameters}`标记表示。
 
@@ -28,11 +28,11 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 * `out_file`是输出文件名，用`{OutputFile}`标记表示。
 
-综上，在`Universal GUI`的`Argument templet`中填入：`{UserParameters} {InputFile} -o {OutputFile}`。请留意在标记之间按需添加空格。
+综上，在`Argument templet`中填入：`{UserParameters} {InputFile} -o {OutputFile}`。请留意在标记之间按需添加空格。
 
-接着在`Universal GUI`的`User arguments`中填入所需的参数，这些文本将替换`{UserParameters}`标记。当然，你也可以直接在`Argument templet`中填入所需参数，不使用`{UserParameters}`标记（这可以适配一些对于输入文件有一些选项，对输出文件又有一些选项，并且这些选项在参数中的位置不连续的程序，例如FFmpeg）。
+接着在`User arguments`中填入所需参数，这将替换`{UserParameters}`标记。当然，你也可以直接在`Argument templet`中填入参数，不使用`{UserParameters}`标记。
 
-可以在`Thread number`这个Combo Box中选择线程数，这将同时运行多个源程序，充分利用CPU时间。
+可以在`Thread count`这个Combo Box中选择线程数。这将同时运行多个源程序，充分利用CPU算力。
 
 其他功能按需食用。
 
@@ -53,7 +53,7 @@ Usage: cwebp [-preset <...>] [options] in_file [-o out_file]
 
 ### Matters Need Attention
 
-* 可在程序所在目录下新建一个名为`Portable`的文件（无拓展名），让程序把ini配置文件放在所在目录，达到便携化效果。
+* 可在程序所在目录下新建名为`Portable`的文件（无拓展名），让程序把配置文件放在所在目录，达到便携化效果。
 
 * 在**所有CPU都已占满**时，`Process.Start();`需要很长时间，因此可能难以达到所指定的线程数。
 

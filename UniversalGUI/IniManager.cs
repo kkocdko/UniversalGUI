@@ -19,13 +19,7 @@ public class IniManager
     /// <param name="lpFileName">File path</param>
     /// <returns></returns>
     [DllImport("kernel32")]
-    private static extern int GetPrivateProfileString(
-        string section,
-        string key,
-        string value,
-        StringBuilder cache,
-        int cacheSize,
-        string path);
+    private static extern int GetPrivateProfileString(string section, string key, string value, StringBuilder cache, int cacheSize, string path);
 
     /// <summary>
     /// Write value
@@ -36,23 +30,19 @@ public class IniManager
     /// <param name="mpFileName">File path</param>
     /// <returns>0：error 1：success</returns>
     [DllImport("kernel32")]
-    private static extern long WritePrivateProfileString(
-        string section,
-        string key,
-        string value,
-        string path);
+    private static extern long WritePrivateProfileString(string section, string key, string value, string path);
     #endregion
-
-    public string IniFile { get; private set; }
 
     /// <summary>
     /// IniManager constructor
     /// </summary>
     /// <param name="path">Ini file's full path</param>
-    public IniManager(string path)
+    public IniManager(string iniFilePath)
     {
-        IniFile = path;
+        IniFilePath = iniFilePath;
     }
+
+    public string IniFilePath;
 
     /// <summary>
     /// Read ini key
@@ -60,10 +50,10 @@ public class IniManager
     /// <param name="section">Section name</param>
     /// <param name="key">Key name</param>
     /// <returns>Read value</returns>
-    public string Read(string section, string key)
+    public string Read(string section, string key, int cacheSize = 1024)
     {
-        var stringBuilder = new StringBuilder(1024);
-        GetPrivateProfileString(section, key, "", stringBuilder, 1024, IniFile);
+        var stringBuilder = new StringBuilder(cacheSize);
+        GetPrivateProfileString(section, key, "", stringBuilder, cacheSize, IniFilePath);
         string value = stringBuilder.ToString();
         return value;
     }
@@ -76,7 +66,7 @@ public class IniManager
     /// <param name="value">Write value</param>
     public void Write<T>(string section, string key, T value)
     {
-        WritePrivateProfileString(section, key, value.ToString(), IniFile);
+        WritePrivateProfileString(section, key, value.ToString(), IniFilePath);
     }
 
     /// <summary>
@@ -86,7 +76,7 @@ public class IniManager
     /// <param name="key">Key name</param>
     public void Delete(string section, string key = null)
     {
-        WritePrivateProfileString(section, key, null, IniFile);
+        WritePrivateProfileString(section, key, null, IniFilePath);
     }
 
     /// <summary>
@@ -94,10 +84,10 @@ public class IniManager
     /// </summary>
     public void CreatFile()
     {
-        string iniFilePath = Path.GetDirectoryName(IniFile);
+        string iniFilePath = Path.GetDirectoryName(IniFilePath);
         if (Directory.Exists(iniFilePath))
         {
-            var fs = File.Create(IniFile);
+            var fs = File.Create(IniFilePath);
             fs.Close();
         }
         else

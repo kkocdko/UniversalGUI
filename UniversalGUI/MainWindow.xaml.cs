@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -7,10 +8,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace UniversalGUI
 {
@@ -21,6 +21,7 @@ namespace UniversalGUI
         {
             InitializeComponent();
 
+            this.DataContext = uiData = new MainWindowData();
             DefaultTitle = this.Title;
             IniConfigManager = new IniManager(GetIniConfigFile());
             ImputIniConfig(IniConfigManager);
@@ -29,18 +30,17 @@ namespace UniversalGUI
 
         private readonly string DefaultTitle;
 
+        public MainWindowData uiData;
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             StartMonitorAsync();
         }
 
-        private void MainWindow_WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void MainWindow_WindowClosing(object sender, CancelEventArgs e)
         {
+            StartTaskButton.Focus(); //Ensure that the contents of the window being modified are saved
             SaveIniConfig(IniConfigManager);
-        }
-
-        private void MainWindow_WindowClosed(object sender, EventArgs e)
-        {
             StopTask();
         }
 
@@ -70,42 +70,31 @@ namespace UniversalGUI
 
         private async void StartTaskButton_Click(object sender, RoutedEventArgs e)
         {
-            if (TaskProgressBar.Visibility == Visibility.Visible)
+            if (!uiData.ConfigVariable)
             {
                 StopTask();
                 return;
             }
+            StartTaskButton.Content = QueryLangDict("Button_StartTask_Stop");
+            uiData.ConfigVariable = false;
+            SetProgress(0);
+            SumFilesConfig();
+            bool settingLegal = CheckConfig();
+            await Task.Run(StartTask);
+            if (settingLegal == true)
+            {
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Finished");
+                SetProgress(1);
+            }
             else
             {
-                // Change UI
-                //TaskSettings.IsEnabled = false;
-                StartTaskButton.Content = QueryLangDict("Button_StartTask_Stop");
-                SetProgress(0);
-
-                // Collect config
-                SumConfig();
-                bool settingLegal = CheckConfig();
-
-                // Start task
-                await Task.Run(() => StartTask());
-
-                // Change UI
-                //TaskSettings.IsEnabled = true;
-                if (settingLegal == true)
-                {
-                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Finished");
-                    SetProgress(1);
-                }
-                else
-                {
-                    StartTaskButton.Content = QueryLangDict("Button_StartTask_Error");
-                    SetProgress(-1);
-                }
-                await Task.Delay(3000); //Show result to user
-                StartTaskButton.Content = QueryLangDict("Button_StartTask_Start");
-                TaskProgressBar.Visibility = Visibility.Hidden;
-                SetProgress(); // Reset progress
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Error");
+                SetProgress(-1);
             }
+            await Task.Delay(3000); //Show result to user
+            StartTaskButton.Content = QueryLangDict("Button_StartTask_Start");
+            uiData.ConfigVariable = true;
+            SetProgress();
         }
 
         private void SetProgress(double multiple = -2)
@@ -123,7 +112,7 @@ namespace UniversalGUI
             {
                 SetTitleSuffix();
                 TaskProgressBar.Value = 0;
-                TaskProgressBar.Foreground = new SolidColorBrush(Colors.DimGray);
+                TaskProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(153, 153, 153));
                 TaskProgressBar.Visibility = Visibility.Hidden;
                 TaskbarManager.SetProgressValue(0, 100);
                 TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress);
@@ -153,81 +142,83 @@ namespace UniversalGUI
 
         private async void StartMonitorAsync()
         {
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 var cpuPerformanceCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
                 cpuPerformanceCounter.NextValue();
                 double cpuUseRatio;
                 var computerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
-                double usedMem;
-                string memUnit = "KB";
-                double memUseRatio;
+                double usedRam;
+                string ramUnit = "KB";
+                double ramUseRatio;
                 while (true)
                 {
                     cpuUseRatio = Math.Round(cpuPerformanceCounter.NextValue());
-                    usedMem = (double)computerInfo.TotalPhysicalMemory - computerInfo.AvailablePhysicalMemory;
-                    memUseRatio = Math.Round(usedMem / computerInfo.TotalPhysicalMemory * 100);
-                    if (usedMem >= 1099511627776) //1TB
+                    usedRam = (double)computerInfo.TotalPhysicalMemory - computerInfo.AvailablePhysicalMemory;
+                    ramUseRatio = Math.Round(usedRam / computerInfo.TotalPhysicalMemory * 100);
+                    if (usedRam >= 1099511627776) //1TB
                     {
-                        memUnit = "TB";
-                        usedMem /= 1099511627776; //1024^4
-                        usedMem = Math.Round(usedMem, 3);
+                        ramUnit = "TB";
+                        usedRam /= 1099511627776; //1024^4
+                        usedRam = Math.Round(usedRam, 3);
                     }
-                    else if (usedMem >= 107374182400) //100GB
+                    else if (usedRam >= 107374182400) //100GB
                     {
-                        memUnit = "GB";
-                        usedMem /= 1073741824; //^3
-                        usedMem = Math.Round(usedMem, 1);
+                        ramUnit = "GB";
+                        usedRam /= 1073741824; //^3
+                        usedRam = Math.Round(usedRam, 1);
                     }
-                    else if (usedMem >= 10737418240) //10GB
+                    else if (usedRam >= 10737418240) //10GB
                     {
-                        memUnit = "GB";
-                        usedMem /= 1073741824; //^3
-                        usedMem = Math.Round(usedMem, 2);
+                        ramUnit = "GB";
+                        usedRam /= 1073741824; //^3
+                        usedRam = Math.Round(usedRam, 2);
                     }
-                    else if (usedMem >= 1073741824) //1GB
+                    else if (usedRam >= 1073741824) //1GB
                     {
-                        memUnit = "GB";
-                        usedMem /= 1073741824; //^3
-                        usedMem = Math.Round(usedMem, 3);
+                        ramUnit = "GB";
+                        usedRam /= 1073741824; //^3
+                        usedRam = Math.Round(usedRam, 3);
                     }
-                    else if (usedMem >= 104857600) //100MB
+                    else if (usedRam >= 104857600) //100MB
                     {
-                        memUnit = "MB";
-                        usedMem /= 1048576;//^2
-                        usedMem = Math.Round(usedMem, 1);
+                        ramUnit = "MB";
+                        usedRam /= 1048576;//^2
+                        usedRam = Math.Round(usedRam, 1);
                     }
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        MonitorForCPU.Content = cpuUseRatio + "%";
-                        MonitorForRAM.Content = usedMem + memUnit + " (" + memUseRatio + "%)";
-                    });
-
-                    Thread.Sleep(1000);
+                    uiData.CpuUsage = cpuUseRatio + "%";
+                    uiData.RamUsage = usedRam + ramUnit + " (" + ramUseRatio + "%)";
+                    await Task.Delay(1000);
                 }
             });
         }
 
         private bool CheckConfig()
         {
-            string title = QueryLangDict("Message_Title_Error");
+            string errorTitle = QueryLangDict("Message_Title_Error");
             if (FilesList.Items.Count == 0)
             {
-                string content = QueryLangDict("Message_FileslistIsEmpty");
-                MessageBox.Show(content, title);
+                MessageBox.Show(
+                    QueryLangDict("Message_FileslistIsEmpty"),
+                    errorTitle
+                );
                 return false;
             }
-            else if (AppPath.Text == "")
+            else if (uiData.AppPath == "")
             {
-                string content = QueryLangDict("Message_CommandAppUnspecified");
-                MessageBox.Show(content, title);
+                MessageBox.Show(
+                    QueryLangDict("Message_CommandAppUnspecified"),
+                    errorTitle
+                );
                 return false;
             }
-            else if (OutputFloder.Text == "" && OutputExtension.Text == "" && OutputSuffix.Text == "")
+            else if (uiData.OutputFloder == "" && uiData.OutputExtension == "" && uiData.OutputSuffix == "")
             {
-                string content = QueryLangDict("Message_OutputSettingsDangerous");
-                var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
+                var result = MessageBox.Show(
+                    QueryLangDict("Message_OutputSettingsDangerous"),
+                    errorTitle,
+                    MessageBoxButton.YesNo
+                );
                 if (result == MessageBoxResult.No)
                 {
                     return false;
@@ -237,15 +228,19 @@ namespace UniversalGUI
             {
                 if (Convert.ToInt32(CustomThreadNumberItem.Tag) == 0 || CustomThreadNumberTextBox.Text == "")
                 {
-                    string content = QueryLangDict("Message_ThreadNumberIsIllegal");
-                    MessageBox.Show(content, title);
+                    MessageBox.Show(
+                        QueryLangDict("Message_ThreadNumberIsIllegal"),
+                        errorTitle
+                    );
                     return false;
                 }
             }
-            else if (AppPath.Text.IndexOf(' ') != -1 && Convert.ToInt32(SimulateCmd.SelectedValue) == 2)
+            else if (AppPath.Text.IndexOf(' ') != -1 && uiData.SimulateCmd == 2)
             {
-                string content = QueryLangDict("Message_SimulateCmdIsIllegal");
-                MessageBox.Show(content, title);
+                MessageBox.Show(
+                    QueryLangDict("Message_SimulateCmdIsIllegal"),
+                    errorTitle
+                );
                 return false;
             }
             return true;
@@ -326,12 +321,12 @@ namespace UniversalGUI
             var sender = (TextBox)senderObj;
             string[] dropFiles = (string[])e.Data.GetData(DataFormats.FileDrop);
             sender.Text = dropFiles[0];
+            sender.Focus();
         }
 
-        private void InsertArgsTempletTag(string tagContent)
+        private void InsertToArgsTemplet(string insertContent)
         {
-            string text = ArgsTemplet.Text;
-            string insertContent = "{" + tagContent + "}";
+            string text = uiData.ArgsTemplet;
             int selectionStart = ArgsTemplet.SelectionStart;
             text = text.Insert(selectionStart, insertContent);
             ArgsTemplet.Text = text;
@@ -339,26 +334,18 @@ namespace UniversalGUI
             ArgsTemplet.Focus();
         }
 
-        private void InsertArgsTempletMark_UserParameters(object sender, RoutedEventArgs e)
+        private void InsertArgsTempletMark(object senderObj, RoutedEventArgs e)
         {
-            InsertArgsTempletTag("UserParameters");
-        }
-
-        private void InsertArgsTempletMark_InputFile(object sender, RoutedEventArgs e)
-        {
-            InsertArgsTempletTag("InputFile");
-        }
-
-        private void InsertArgsTempletMark_OutputFile(object sender, RoutedEventArgs e)
-        {
-            InsertArgsTempletTag("OutputFile");
+            var sender = (MenuItem)senderObj;
+            InsertToArgsTemplet(sender.Header.ToString());
         }
 
         private void ShowArgsTempletHelp(object sender, RoutedEventArgs e)
         {
-            string title = QueryLangDict("Message_Title_Hint");
-            string content = QueryLangDict("Message_ArgsTempletHelp");
-            MessageBox.Show(content, title);
+            MessageBox.Show(
+                QueryLangDict("Message_ArgsTempletHelp"),
+                QueryLangDict("Message_Title_Hint")
+            );
         }
 
         private void SwitchOutputFloder(object sender, RoutedEventArgs e)
@@ -409,7 +396,7 @@ namespace UniversalGUI
     {
         private const string IniConfigFileName = "Config.ini";
 
-        private const string IniConfigFileVersion = "0.7.7.2"; // Configfile's version, not app version
+        private const string IniConfigFileVersion = "1.0.1.1"; // Configfile's version, not app version
 
         private readonly IniManager IniConfigManager;
 
@@ -430,7 +417,7 @@ namespace UniversalGUI
 
         private void ImputIniConfig(IniManager ini)
         {
-            if (File.Exists(ini.IniFile) && File.ReadAllBytes(ini.IniFile).Length != 0)
+            if (File.Exists(ini.IniFilePath) && File.ReadAllBytes(ini.IniFilePath).Length != 0)
             {
                 if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion)
                 {
@@ -441,25 +428,24 @@ namespace UniversalGUI
                         string windowHeight = ini.Read("Window", "Height");
                         this.Height = Convert.ToDouble(windowHeight);
 
-                        AppPath.Text = ini.Read("Command", "AppPath");
-                        ArgsTemplet.Text = ini.Read("Command", "ArgsTemplet");
-                        UserArgs.Text = ini.Read("Command", "UserArgs");
-                        OutputExtension.Text = ini.Read("Output", "Extension");
-                        OutputSuffix.Text = ini.Read("Output", "Suffix");
-                        OutputFloder.Text = ini.Read("Output", "Floder");
-                        Priority.SelectedValue = ini.Read("Process", "Priority");
-
-                        uint threadNumber = Convert.ToUInt32(ini.Read("Process", "ThreadNumber"));
-                        ThreadNumber.SelectedValue = threadNumber;
-                        if (threadNumber > 8)
+                        uiData.AppPath = ini.Read("Command", "AppPath");
+                        uiData.ArgsTemplet = ini.Read("Command", "ArgsTemplet");
+                        uiData.UserArgs = ini.Read("Command", "UserArgs");
+                        uiData.OutputExtension = ini.Read("Output", "Extension");
+                        uiData.OutputSuffix = ini.Read("Output", "Suffix");
+                        uiData.OutputFloder = ini.Read("Output", "Floder");
+                        uiData.Priority = Convert.ToUInt16(ini.Read("Process", "Priority"));
+                        ushort threadCount = Convert.ToUInt16(ini.Read("Process", "ThreadCount"));
+                        if (threadCount > 8)
                         {
-                            CustomThreadNumberTextBox.Text = threadNumber.ToString();
-                            CustomThreadNumberItem.Tag = threadNumber;
-                            CustomThreadNumberItem.IsSelected = true;
+                            //Bug !!!
+                            CustomThreadNumberTextBox.Text = threadCount.ToString();
+                            //CustomThreadNumberItem.Tag = threadCount;
+                            //CustomThreadNumberItem.IsSelected = true;
                         }
-
-                        CUIWindowStyle.SelectedValue = ini.Read("Process", "WindowStyle");
-                        SimulateCmd.SelectedValue = ini.Read("Process", "SimulateCmd");
+                        uiData.ThreadCount = threadCount;
+                        uiData.WindowStyle = Convert.ToUInt16(ini.Read("Process", "WindowStyle"));
+                        uiData.SimulateCmd = Convert.ToUInt16(ini.Read("Process", "SimulateCmd"));
 
                         string culture = ini.Read("Language", "Culture");
                         if (culture != "")
@@ -469,23 +455,25 @@ namespace UniversalGUI
                     }
                     catch (Exception e)
                     {
-                        string title = QueryLangDict("Message_Title_Error");
-                        string content = QueryLangDict("Message_ConfigfileFormatMistake");
-                        MessageBox.Show(content + "\n\n" + e.TargetSite + "\n\n" + e.Message, title);
+                        MessageBox.Show(
+                            QueryLangDict("Message_ConfigfileFormatMistake") + "\n\n" + e.TargetSite + "\n\n" + e.Message,
+                            QueryLangDict("Message_Title_Error")
+                        );
                     }
                 }
                 else
                 {
-                    string title = QueryLangDict("Message_Title_Hint");
-                    string content = QueryLangDict("Message_UseBuildInConfigfile");
-                    MessageBox.Show(content, title);
+                    MessageBox.Show(
+                        QueryLangDict("Message_UseBuildInConfigfile"),
+                        QueryLangDict("Message_Title_Hint")
+                    );
                 }
             }
         }
 
         private void SaveIniConfig(IniManager ini)
         {
-            if (!File.Exists(ini.IniFile))
+            if (!File.Exists(ini.IniFilePath))
             {
                 try
                 {
@@ -493,34 +481,37 @@ namespace UniversalGUI
                 }
                 catch
                 {
-                    string title = QueryLangDict("Message_Title_Error");
-                    string content = QueryLangDict("Message_CanNotWriteConfigfile");
-                    MessageBox.Show(content, title);
+                    MessageBox.Show(
+                        QueryLangDict("Message_CanNotWriteConfigfile"),
+                        QueryLangDict("Message_Title_Error")
+                    );
                     return;
                 }
             }
 
-            if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion || File.ReadAllBytes(ini.IniFile).Length == 0)
+            if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion || File.ReadAllBytes(ini.IniFilePath).Length == 0)
             {
                 ini.Write("Versions", "ConfigFile", IniConfigFileVersion);
                 ini.Write("Window", "Width", this.Width);
                 ini.Write("Window", "Height", this.Height);
-                ini.Write("Command", "AppPath", AppPath.Text);
-                ini.Write("Command", "ArgsTemplet", ArgsTemplet.Text);
-                ini.Write("Command", "UserArgs", UserArgs.Text);
-                ini.Write("Output", "Extension", OutputExtension.Text);
-                ini.Write("Output", "Suffix", OutputSuffix.Text);
-                ini.Write("Output", "Floder", OutputFloder.Text);
-                ini.Write("Process", "Priority", Priority.SelectedValue);
-                ini.Write("Process", "ThreadNumber", ThreadNumber.SelectedValue);
-                ini.Write("Process", "WindowStyle", CUIWindowStyle.SelectedValue);
-                ini.Write("Process", "SimulateCmd", SimulateCmd.SelectedValue);
+                ini.Write("Command", "AppPath", uiData.AppPath);
+                ini.Write("Command", "ArgsTemplet", uiData.ArgsTemplet);
+                ini.Write("Command", "UserArgs", uiData.UserArgs);
+                ini.Write("Output", "Extension", uiData.OutputExtension);
+                ini.Write("Output", "Suffix", uiData.OutputSuffix);
+                ini.Write("Output", "Floder", uiData.OutputFloder);
+                ini.Write("Process", "Priority", uiData.Priority);
+                ini.Write("Process", "ThreadCount", uiData.ThreadCount);
+                ini.Write("Process", "WindowStyle", uiData.WindowStyle);
+                ini.Write("Process", "SimulateCmd", uiData.SimulateCmd);
             }
             else
             {
-                string title = QueryLangDict("Message_Title_Hint");
-                string content = QueryLangDict("Message_CreatNewConfigfile");
-                var result = MessageBox.Show(content, title, MessageBoxButton.YesNo);
+                var result = MessageBox.Show(
+                    QueryLangDict("Message_CreatNewConfigfile"),
+                    QueryLangDict("Message_Title_Hint"),
+                    MessageBoxButton.YesNo
+                );
                 if (result == MessageBoxResult.Yes)
                 {
                     ini.CreatFile();
@@ -528,6 +519,110 @@ namespace UniversalGUI
                 }
             }
 
+        }
+    }
+
+    public class MainWindowData : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyValueChanged(string argName)
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs(argName));
+            }
+        }
+
+        private string _appPath;
+        public string AppPath
+        {
+            get => _appPath;
+            set { _appPath = value; NotifyValueChanged("AppPath"); }
+        }
+
+        private string _argsTemplet;
+        public string ArgsTemplet
+        {
+            get => _argsTemplet;
+            set { _argsTemplet = value; NotifyValueChanged("ArgsTemplet"); }
+        }
+
+        private string _userArgs;
+        public string UserArgs
+        {
+            get => _userArgs;
+            set { _userArgs = value; NotifyValueChanged("UserArgs"); }
+        }
+
+        private string _outputSuffix = "_Output";
+        public string OutputSuffix
+        {
+            get => _outputSuffix;
+            set { _outputSuffix = value; NotifyValueChanged("OutputSuffix"); }
+        }
+
+        private string _outputExtension;
+        public string OutputExtension
+        {
+            get => _outputExtension;
+            set { _outputExtension = value; NotifyValueChanged("OutputExtension"); }
+        }
+
+        private string _outputFloder;
+        public string OutputFloder
+        {
+            get => _outputFloder;
+            set { _outputFloder = value; NotifyValueChanged("OutputFloder"); }
+        }
+
+        private ushort _priority;
+        public ushort Priority
+        {
+            get => _priority;
+            set { _priority = value; NotifyValueChanged("Priority"); }
+        }
+
+        private ushort _threadCount;
+        public ushort ThreadCount
+        {
+            get => _threadCount;
+            set { _threadCount = value; NotifyValueChanged("ThreadCount"); }
+        }
+
+        private ushort _windowStyle;
+        public ushort WindowStyle
+        {
+            get => _windowStyle;
+            set { _windowStyle = value; NotifyValueChanged("WindowStyle"); }
+        }
+
+        private ushort _simulateCmd;
+        public ushort SimulateCmd
+        {
+            get => _simulateCmd;
+            set { _simulateCmd = value; NotifyValueChanged("SimulateCmd"); }
+        }
+
+        private bool _configVariable = true;
+        public bool ConfigVariable
+        {
+            get => _configVariable;
+            set { _configVariable = value; NotifyValueChanged("ConfigVariable"); }
+        }
+
+        private string _cpuUsage = "--%";
+        public string CpuUsage
+        {
+            get => _cpuUsage;
+            set { _cpuUsage = value; NotifyValueChanged("CpuUsage"); }
+        }
+
+        private string _ramUsage = "----GB (--%)";
+        public string RamUsage
+        {
+            get => _ramUsage;
+            set { _ramUsage = value; NotifyValueChanged("RamUsage"); }
         }
     }
 }
