@@ -170,7 +170,7 @@
                     <ComboBoxItem Tag="6" Content="6"/>
                     <ComboBoxItem Tag="7" Content="7"/>
                     <ComboBoxItem Tag="8" Content="8"/>
-                    <ComboBoxItem x:Name="CustomThreadCountItem" Tag="{Binding CustomThreadCountTextBox.Text}">
+                    <ComboBoxItem x:Name="CustomThreadCountItem">
                         <TextBox x:Name="CustomThreadCountTextBox" MinWidth="40" Margin="-2,0" Padding="-1" BorderBrush="{x:Null}" LostFocus="CustomThreadCountTextBox_LostFocus" TextChanged="CustomThreadCountTextBox_TextChanged"/>
                     </ComboBoxItem>
                 </ComboBox>

@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace UniversalGUI
 {
@@ -22,7 +21,7 @@ namespace UniversalGUI
         {
             int threadCount = UiData.ThreadCount;
             processIds = new int[threadCount];
-            Task[] tasks = new Task[threadCount];
+            var tasks = new Task[threadCount];
             for (int i = 0; i < threadCount; i++)
             {
                 tasks[i] = CreateThreadAsync(i);
@@ -266,7 +265,7 @@ namespace UniversalGUI
         {
             get
             {
-                if (Enumerator.MoveNext()) // Side effect !
+                if (Enumerator.MoveNext()) // Side effect!
                 {
                     CompletedCount++;
                     return Enumerator.Current;

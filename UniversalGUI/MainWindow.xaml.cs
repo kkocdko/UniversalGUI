@@ -72,28 +72,21 @@ namespace UniversalGUI
             if (UiData.TaskRunning)
             {
                 StopTask();
-                return;
             }
-            StartTaskButton.Content = QueryLangDict("Button_StartTask_Stop");
-            UiData.TaskRunning = true;
-            SetProgress(0);
-            taskFiles = new TaskFiles(FilesList.Items);
-            bool settingLegal = CheckConfig();
-            await Task.Run(StartTask);
-            if (settingLegal == true)
+            else if (CheckConfig())
             {
+                UiData.TaskRunning = true;
+                SetProgress(0);
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Stop");
+                taskFiles = new TaskFiles(FilesList.Items);
+                await Task.Run(StartTask);
                 StartTaskButton.Content = QueryLangDict("Button_StartTask_Finished");
                 SetProgress(1);
+                await Task.Delay(3000);
+                UiData.TaskRunning = false;
+                SetProgress();
+                StartTaskButton.Content = QueryLangDict("Button_StartTask_Start");
             }
-            else
-            {
-                StartTaskButton.Content = QueryLangDict("Button_StartTask_Error");
-                SetProgress(-1);
-            }
-            await Task.Delay(3000); //Show result to user
-            StartTaskButton.Content = QueryLangDict("Button_StartTask_Start");
-            UiData.TaskRunning = false;
-            SetProgress();
         }
 
         private void SetProgress(double multiple = -2)
@@ -115,15 +108,6 @@ namespace UniversalGUI
                     TaskProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(153, 153, 153));
                     TaskbarManager.SetProgressValue(0, 100);
                     TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress);
-                }
-                else if (multiple == -1) // Error warning
-                {
-                    string suffix = QueryLangDict("Window_MainWindow_Title_Suffix_Error");
-                    SetTitleSuffix(suffix);
-                    TaskProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(221, 0, 0));
-                    TaskProgressBar.Value = 100;
-                    TaskbarManager.SetProgressValue(100, 100);
-                    TaskbarManager.SetProgressState(TaskbarProgressBarState.Error);
                 }
                 else
                 {
@@ -220,7 +204,7 @@ namespace UniversalGUI
                     return false;
                 }
             }
-            else if (CustomThreadCountItem.IsSelected == true && ((int)CustomThreadCountItem.Tag == 0 || CustomThreadCountTextBox.Text == ""))
+            else if (UiData.ThreadCount == 0 || CustomThreadCountTextBox.Text == "")
             {
                 MessageBox.Show(
                     QueryLangDict("Message_ThreadNumberIsIllegal"),
@@ -368,6 +352,7 @@ namespace UniversalGUI
         private void CustomThreadCountTextBox_TextChanged(object senderObj, TextChangedEventArgs e)
         {
             var sender = (TextBox)senderObj;
+            CustomThreadCountItem.Tag = sender.Text;
             try
             {
                 Convert.ToUInt16(sender.Text);
@@ -404,55 +389,51 @@ namespace UniversalGUI
 
         private void ImputIniConfig(IniManager ini)
         {
-            if (File.Exists(ini.IniFilePath) && File.ReadAllBytes(ini.IniFilePath).Length != 0)
+            if (!File.Exists(ini.IniFilePath) || File.ReadAllBytes(ini.IniFilePath).Length == 0)
             {
-                if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion)
+                return;
+            }
+            else if (ini.Read("Versions", "ConfigFile") != IniConfigFileVersion)
+            {
+                MessageBox.Show(
+                    QueryLangDict("Message_UseBuildInConfigfile"),
+                    QueryLangDict("Message_Title_Hint")
+                );
+                return;
+            }
+            else
+            {
+                try
                 {
-                    try
+                    this.Width = Convert.ToDouble(ini.Read("Window", "Width"));
+                    this.Height = Convert.ToDouble(ini.Read("Window", "Height"));
+                    UiData.AppPath = ini.Read("Command", "AppPath");
+                    UiData.ArgsTemplet = ini.Read("Command", "ArgsTemplet");
+                    UiData.UserArgs = ini.Read("Command", "UserArgs");
+                    UiData.OutputExtension = ini.Read("Output", "Extension");
+                    UiData.OutputSuffix = ini.Read("Output", "Suffix");
+                    UiData.OutputFloder = ini.Read("Output", "Floder");
+                    UiData.Priority = Convert.ToInt32(ini.Read("Process", "Priority"));
+                    int threadCount = Convert.ToInt32(ini.Read("Process", "ThreadCount"));
+                    if (threadCount > 8)
                     {
-                        string windowWidth = ini.Read("Window", "Width");
-                        this.Width = Convert.ToDouble(windowWidth);
-                        string windowHeight = ini.Read("Window", "Height");
-                        this.Height = Convert.ToDouble(windowHeight);
-
-                        UiData.AppPath = ini.Read("Command", "AppPath");
-                        UiData.ArgsTemplet = ini.Read("Command", "ArgsTemplet");
-                        UiData.UserArgs = ini.Read("Command", "UserArgs");
-                        UiData.OutputExtension = ini.Read("Output", "Extension");
-                        UiData.OutputSuffix = ini.Read("Output", "Suffix");
-                        UiData.OutputFloder = ini.Read("Output", "Floder");
-                        UiData.Priority = Convert.ToInt32(ini.Read("Process", "Priority"));
-                        int threadCount = Convert.ToInt32(ini.Read("Process", "ThreadCount"));
-                        if (threadCount > 8)
-                        {
-                            //Bug !!!
-                            CustomThreadCountTextBox.Text = threadCount.ToString();
-                            //CustomThreadCountItem.Tag = threadCount;
-                            //CustomThreadCountItem.IsSelected = true;
-                        }
-                        UiData.ThreadCount = threadCount;
-                        UiData.WindowStyle = Convert.ToInt32(ini.Read("Process", "WindowStyle"));
-                        UiData.SimulateCmd = Convert.ToInt32(ini.Read("Process", "SimulateCmd"));
-
-                        string culture = ini.Read("Language", "Culture");
-                        if (culture != "")
-                        {
-                            Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
-                        }
+                        CustomThreadCountTextBox.Text = threadCount.ToString();
                     }
-                    catch (Exception e)
+                    UiData.ThreadCount = threadCount;
+                    UiData.WindowStyle = Convert.ToInt32(ini.Read("Process", "WindowStyle"));
+                    UiData.SimulateCmd = Convert.ToInt32(ini.Read("Process", "SimulateCmd"));
+
+                    string culture = ini.Read("Language", "Culture");
+                    if (culture != "")
                     {
-                        MessageBox.Show(
-                            QueryLangDict("Message_ConfigfileFormatMistake") + "\n\n" + e.TargetSite + "\n\n" + e.Message,
-                            QueryLangDict("Message_Title_Error")
-                        );
+                        Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
                     }
                 }
-                else
+                catch (Exception e)
                 {
                     MessageBox.Show(
-                        QueryLangDict("Message_UseBuildInConfigfile"),
-                        QueryLangDict("Message_Title_Hint")
+                        QueryLangDict("Message_ConfigfileFormatMistake") + "\n\n" + e.TargetSite + "\n\n" + e.Message,
+                        QueryLangDict("Message_Title_Error")
                     );
                 }
             }
@@ -475,8 +456,19 @@ namespace UniversalGUI
                     return;
                 }
             }
-
-            if (ini.Read("Versions", "ConfigFile") == IniConfigFileVersion || File.ReadAllBytes(ini.IniFilePath).Length == 0)
+            else if (ini.Read("Versions", "ConfigFile") != IniConfigFileVersion || File.ReadAllBytes(ini.IniFilePath).Length == 0)
+            {
+                var result = MessageBox.Show(
+                    QueryLangDict("Message_CreatNewConfigfile"),
+                    QueryLangDict("Message_Title_Hint"),
+                    MessageBoxButton.YesNo
+                );
+                if (result == MessageBoxResult.Yes)
+                {
+                    ini.CreatFile();
+                }
+            }
+            else
             {
                 ini.Write("Versions", "ConfigFile", IniConfigFileVersion);
                 ini.Write("Window", "Width", this.Width);
@@ -491,19 +483,6 @@ namespace UniversalGUI
                 ini.Write("Process", "ThreadCount", UiData.ThreadCount);
                 ini.Write("Process", "WindowStyle", UiData.WindowStyle);
                 ini.Write("Process", "SimulateCmd", UiData.SimulateCmd);
-            }
-            else
-            {
-                var result = MessageBox.Show(
-                    QueryLangDict("Message_CreatNewConfigfile"),
-                    QueryLangDict("Message_Title_Hint"),
-                    MessageBoxButton.YesNo
-                );
-                if (result == MessageBoxResult.Yes)
-                {
-                    ini.CreatFile();
-                    SaveIniConfig(ini);
-                }
             }
         }
     }
@@ -590,12 +569,6 @@ namespace UniversalGUI
             set { _simulateCmd = value; NotifyValueChanged("SimulateCmd"); }
         }
 
-        public bool ConfigVariable
-        {
-            get => !TaskRunning;
-            set => NotifyValueChanged("ConfigVariable"); // Throw set value
-        }
-
         private bool _taskRunning = false;
         public bool TaskRunning
         {
@@ -606,6 +579,12 @@ namespace UniversalGUI
                 ConfigVariable = !value;
                 NotifyValueChanged("TaskRunning");
             }
+        }
+
+        public bool ConfigVariable
+        {
+            get => !TaskRunning;
+            set => NotifyValueChanged("ConfigVariable"); // Throw set value
         }
 
         private string _cpuUsage = "--%";
