@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace UniversalGUI
@@ -13,26 +14,25 @@ namespace UniversalGUI
 
     public partial class MainWindow : Window
     {
-        private FilesConfig filesConfig = new FilesConfig();
+        private TaskFiles taskFiles = new TaskFiles();
 
         private int[] processIds = { };
 
         public void StartTask()
         {
-            ushort threadCount = uiData.ThreadCount;
-            Task[] tasks = new Task[threadCount];
+            int threadCount = uiData.ThreadCount;
             processIds = new int[threadCount];
-            for (int i = 0, l = threadCount; i < l; i++)
+            Task[] tasks = new Task[threadCount];
+            for (int i = 0; i < threadCount; i++)
             {
-                tasks[i] = NewThreadAsync((uint)i);
+                tasks[i] = CreateThreadAsync(i);
             }
             Task.WaitAll(tasks);
         }
 
         public void StopTask()
         {
-            filesConfig.FilesList = new LinkedList<string>();
-            filesConfig.FilesListEnumerator = filesConfig.FilesList.GetEnumerator();
+            taskFiles = new TaskFiles();
             for (int i = 0, l = processIds.Length; i < l; i++)
             {
                 try
@@ -43,40 +43,47 @@ namespace UniversalGUI
                     }
                     processIds[i] = 0;
                 }
-                catch (System.ArgumentException e)
+                catch (ArgumentException e)
                 {
                     Debug.WriteLine("Maybe the process [" + processIds[i] + "] isn't running. Exception message: " + e.Message);
                 }
-                catch (System.ComponentModel.Win32Exception e)
+                catch (Win32Exception e)
                 {
-                    MessageBox.Show("Can't kill the process [" + processIds[i] + "] . You can try again. Exception message: " + e.Message);
+                    MessageBox.Show(
+                        "Can't kill the process [" + processIds[i] + "] . You can try again. Exception message: " + e.Message,
+                        QueryLangDict("Message_Title_Error")
+                    );
                 }
             }
         }
 
-        public async Task NewThreadAsync(uint index)
+        public async Task CreateThreadAsync(int threadIndex)
         {
-            while (filesConfig.FilesListEnumerator.MoveNext()) // Side effect !
+            while (true)
             {
+                string currentFile = taskFiles.Current;
+                if (currentFile == null)
+                {
+                    break;
+                }
                 string appArgs = SumAppArgs(
                     argsTemplet: uiData.ArgsTemplet,
-                    inputFile: filesConfig.FilesListEnumerator.Current,
+                    inputFile: currentFile,
                     userArgs: uiData.UserArgs,
                     outputSuffix: uiData.OutputSuffix,
                     outputExtension: uiData.OutputExtension,
                     outputFloder: uiData.OutputFloder
                 );
-                Process process = NewProcess(
+                Process process = CreateProcess(
                     appPath: uiData.AppPath,
                     appArgs: appArgs,
                     windowStyle: uiData.WindowStyle,
                     priority: uiData.Priority,
                     simulateCmd: uiData.SimulateCmd
                 );
-                processIds[index] = process.Id;
+                processIds[threadIndex] = process.Id;
                 await Task.Run(process.WaitForExit);
-                filesConfig.CompletedFilesCount++;
-                Dispatcher.Invoke(() => SetProgress((double)filesConfig.CompletedFilesCount / filesConfig.FilesCount));
+                SetProgress(taskFiles.CompletionRate);
             }
         }
 
@@ -137,8 +144,7 @@ namespace UniversalGUI
                 else
                 {
                     //原拓展名
-                    var sourceExtension = new Regex(@"\..[^.]+?$").Match(inputFile);
-                    extension = Convert.ToString(sourceExtension);
+                    extension = new Regex(@"\..[^.]+?$").Match(inputFile).ToString();
                 }
                 //去除拓展名前的点
                 extension = new Regex(@"\.").Replace(extension, "");
@@ -165,7 +171,7 @@ namespace UniversalGUI
             return args;
         }
 
-        private Process NewProcess(string appPath, string appArgs, ushort windowStyle, ushort priority, ushort simulateCmd)
+        private Process CreateProcess(string appPath, string appArgs, int windowStyle, int priority, int simulateCmd)
         {
             var process = new Process();
             if (simulateCmd == 1)
@@ -228,24 +234,53 @@ namespace UniversalGUI
             }
             return process;
         }
-
-        private void SumFilesConfig()
-        {
-            filesConfig = new FilesConfig();
-            foreach (var item in FilesList.Items)
-            {
-                filesConfig.FilesList.AddLast((string)item);
-            }
-            filesConfig.FilesListEnumerator = filesConfig.FilesList.GetEnumerator();
-            filesConfig.FilesCount = (uint)filesConfig.FilesList.Count;
-        }
     }
 
-    public class FilesConfig
+    public class TaskFiles
     {
-        public LinkedList<string> FilesList = new LinkedList<string>();
-        public IEnumerator<string> FilesListEnumerator;
-        public uint FilesCount;
-        public int CompletedFilesCount = 0;
+        public TaskFiles(ItemCollection itemCollection)
+        {
+            foreach (object item in itemCollection)
+            {
+                List.AddLast((string)item);
+            }
+            Enumerator = List.GetEnumerator();
+            Count = List.Count;
+        }
+
+        public TaskFiles()
+        {
+            Enumerator = List.GetEnumerator();
+            Count = List.Count;
+        }
+
+        private LinkedList<string> List = new LinkedList<string>();
+
+        private IEnumerator<string> Enumerator;
+
+        private int Count;
+
+        private int CompletedCount = 0;
+
+        public string Current
+        {
+            get
+            {
+                if (Enumerator.MoveNext()) // Side effect !
+                {
+                    CompletedCount++;
+                    return Enumerator.Current;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        public double CompletionRate
+        {
+            get => Count > 0 ? (double)CompletedCount / Count : 0;
+        }
     }
 }
