@@ -20,7 +20,7 @@ namespace UniversalGUI
         {
             InitializeComponent();
 
-            this.DataContext = uiData = new MainWindowData();
+            this.DataContext = UiData = new MainWindowData();
             DefaultTitle = this.Title;
             IniConfigManager = new IniManager(GetIniConfigFile());
             ImputIniConfig(IniConfigManager);
@@ -29,7 +29,7 @@ namespace UniversalGUI
 
         private readonly string DefaultTitle;
 
-        private MainWindowData uiData;
+        private MainWindowData UiData;
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -69,13 +69,13 @@ namespace UniversalGUI
 
         private async void StartTaskButton_Click(object sender, RoutedEventArgs e)
         {
-            if (uiData.TaskRunning)
+            if (UiData.TaskRunning)
             {
                 StopTask();
                 return;
             }
             StartTaskButton.Content = QueryLangDict("Button_StartTask_Stop");
-            uiData.TaskRunning = true;
+            UiData.TaskRunning = true;
             SetProgress(0);
             taskFiles = new TaskFiles(FilesList.Items);
             bool settingLegal = CheckConfig();
@@ -92,7 +92,7 @@ namespace UniversalGUI
             }
             await Task.Delay(3000); //Show result to user
             StartTaskButton.Content = QueryLangDict("Button_StartTask_Start");
-            uiData.TaskRunning = false;
+            UiData.TaskRunning = false;
             SetProgress();
         }
 
@@ -183,8 +183,8 @@ namespace UniversalGUI
                     usedRam /= 1048576; //1024^2
                     usedRam = Math.Round(usedRam, 0);
                 }
-                uiData.CpuUsage = cpuUseRatio + "%";
-                uiData.RamUsage = usedRam + ramUnit + " (" + ramUseRatio + "%)";
+                UiData.CpuUsage = cpuUseRatio + "%";
+                UiData.RamUsage = usedRam + ramUnit + " (" + ramUseRatio + "%)";
                 await Task.Delay(1000);
             }
         }
@@ -200,7 +200,7 @@ namespace UniversalGUI
                 );
                 return false;
             }
-            else if (uiData.AppPath == "")
+            else if (UiData.AppPath == "")
             {
                 MessageBox.Show(
                     QueryLangDict("Message_CommandAppUnspecified"),
@@ -208,7 +208,7 @@ namespace UniversalGUI
                 );
                 return false;
             }
-            else if (uiData.OutputFloder == "" && uiData.OutputExtension == "" && uiData.OutputSuffix == "")
+            else if (UiData.OutputFloder == "" && UiData.OutputExtension == "" && UiData.OutputSuffix == "")
             {
                 var result = MessageBox.Show(
                     QueryLangDict("Message_OutputSettingsDangerous"),
@@ -228,7 +228,7 @@ namespace UniversalGUI
                 );
                 return false;
             }
-            else if (uiData.SimulateCmd == 2 && AppPath.Text.IndexOf(' ') != -1)
+            else if (UiData.SimulateCmd == 2 && AppPath.Text.IndexOf(' ') != -1)
             {
                 MessageBox.Show(
                     QueryLangDict("Message_SimulateCmdIsIllegal"),
@@ -415,13 +415,13 @@ namespace UniversalGUI
                         string windowHeight = ini.Read("Window", "Height");
                         this.Height = Convert.ToDouble(windowHeight);
 
-                        uiData.AppPath = ini.Read("Command", "AppPath");
-                        uiData.ArgsTemplet = ini.Read("Command", "ArgsTemplet");
-                        uiData.UserArgs = ini.Read("Command", "UserArgs");
-                        uiData.OutputExtension = ini.Read("Output", "Extension");
-                        uiData.OutputSuffix = ini.Read("Output", "Suffix");
-                        uiData.OutputFloder = ini.Read("Output", "Floder");
-                        uiData.Priority = Convert.ToInt32(ini.Read("Process", "Priority"));
+                        UiData.AppPath = ini.Read("Command", "AppPath");
+                        UiData.ArgsTemplet = ini.Read("Command", "ArgsTemplet");
+                        UiData.UserArgs = ini.Read("Command", "UserArgs");
+                        UiData.OutputExtension = ini.Read("Output", "Extension");
+                        UiData.OutputSuffix = ini.Read("Output", "Suffix");
+                        UiData.OutputFloder = ini.Read("Output", "Floder");
+                        UiData.Priority = Convert.ToInt32(ini.Read("Process", "Priority"));
                         int threadCount = Convert.ToInt32(ini.Read("Process", "ThreadCount"));
                         if (threadCount > 8)
                         {
@@ -430,9 +430,9 @@ namespace UniversalGUI
                             //CustomThreadCountItem.Tag = threadCount;
                             //CustomThreadCountItem.IsSelected = true;
                         }
-                        uiData.ThreadCount = threadCount;
-                        uiData.WindowStyle = Convert.ToInt32(ini.Read("Process", "WindowStyle"));
-                        uiData.SimulateCmd = Convert.ToInt32(ini.Read("Process", "SimulateCmd"));
+                        UiData.ThreadCount = threadCount;
+                        UiData.WindowStyle = Convert.ToInt32(ini.Read("Process", "WindowStyle"));
+                        UiData.SimulateCmd = Convert.ToInt32(ini.Read("Process", "SimulateCmd"));
 
                         string culture = ini.Read("Language", "Culture");
                         if (culture != "")
@@ -481,16 +481,16 @@ namespace UniversalGUI
                 ini.Write("Versions", "ConfigFile", IniConfigFileVersion);
                 ini.Write("Window", "Width", this.Width);
                 ini.Write("Window", "Height", this.Height);
-                ini.Write("Command", "AppPath", uiData.AppPath);
-                ini.Write("Command", "ArgsTemplet", uiData.ArgsTemplet);
-                ini.Write("Command", "UserArgs", uiData.UserArgs);
-                ini.Write("Output", "Extension", uiData.OutputExtension);
-                ini.Write("Output", "Suffix", uiData.OutputSuffix);
-                ini.Write("Output", "Floder", uiData.OutputFloder);
-                ini.Write("Process", "Priority", uiData.Priority);
-                ini.Write("Process", "ThreadCount", uiData.ThreadCount);
-                ini.Write("Process", "WindowStyle", uiData.WindowStyle);
-                ini.Write("Process", "SimulateCmd", uiData.SimulateCmd);
+                ini.Write("Command", "AppPath", UiData.AppPath);
+                ini.Write("Command", "ArgsTemplet", UiData.ArgsTemplet);
+                ini.Write("Command", "UserArgs", UiData.UserArgs);
+                ini.Write("Output", "Extension", UiData.OutputExtension);
+                ini.Write("Output", "Suffix", UiData.OutputSuffix);
+                ini.Write("Output", "Floder", UiData.OutputFloder);
+                ini.Write("Process", "Priority", UiData.Priority);
+                ini.Write("Process", "ThreadCount", UiData.ThreadCount);
+                ini.Write("Process", "WindowStyle", UiData.WindowStyle);
+                ini.Write("Process", "SimulateCmd", UiData.SimulateCmd);
             }
             else
             {

@@ -20,7 +20,7 @@ namespace UniversalGUI
 
         public void StartTask()
         {
-            int threadCount = uiData.ThreadCount;
+            int threadCount = UiData.ThreadCount;
             processIds = new int[threadCount];
             Task[] tasks = new Task[threadCount];
             for (int i = 0; i < threadCount; i++)
@@ -67,19 +67,19 @@ namespace UniversalGUI
                     break;
                 }
                 string appArgs = SumAppArgs(
-                    argsTemplet: uiData.ArgsTemplet,
+                    argsTemplet: UiData.ArgsTemplet,
                     inputFile: currentFile,
-                    userArgs: uiData.UserArgs,
-                    outputSuffix: uiData.OutputSuffix,
-                    outputExtension: uiData.OutputExtension,
-                    outputFloder: uiData.OutputFloder
+                    userArgs: UiData.UserArgs,
+                    outputSuffix: UiData.OutputSuffix,
+                    outputExtension: UiData.OutputExtension,
+                    outputFloder: UiData.OutputFloder
                 );
                 Process process = CreateProcess(
-                    appPath: uiData.AppPath,
+                    appPath: UiData.AppPath,
                     appArgs: appArgs,
-                    windowStyle: uiData.WindowStyle,
-                    priority: uiData.Priority,
-                    simulateCmd: uiData.SimulateCmd
+                    windowStyle: UiData.WindowStyle,
+                    priority: UiData.Priority,
+                    simulateCmd: UiData.SimulateCmd
                 );
                 processIds[threadIndex] = process.Id;
                 await Task.Run(process.WaitForExit);
