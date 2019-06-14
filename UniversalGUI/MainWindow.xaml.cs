@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace UniversalGUI
 {
@@ -21,13 +20,11 @@ namespace UniversalGUI
             InitializeComponent();
 
             this.DataContext = UiData = new MainWindowData();
-            DefaultTitle = this.Title;
+            UiData.DefaultTitle = this.Title;
             IniConfigManager = new IniManager(GetIniConfigFile());
             ImputIniConfig(IniConfigManager);
             SetLanguage();
         }
-
-        private readonly string DefaultTitle;
 
         private MainWindowData UiData;
 
@@ -38,9 +35,9 @@ namespace UniversalGUI
 
         private void MainWindow_WindowClosing(object sender, CancelEventArgs e)
         {
-            StartTaskButton.Focus(); //Ensure that the contents of the window being modified are saved
-            SaveIniConfig(IniConfigManager);
             StopTask();
+            StartTaskButton.Focus(); //Ensure that the binding data are saved
+            SaveIniConfig(IniConfigManager);
         }
 
         private string QueryLangDict(string key)
@@ -89,7 +86,7 @@ namespace UniversalGUI
             }
         }
 
-        private void SetProgress(double multiple = -2)
+        private void SetProgress(double multiple = -1)
         {
             Dispatcher.Invoke(() =>
             {
@@ -101,11 +98,10 @@ namespace UniversalGUI
                     TaskbarManager.SetProgressValue(percent, 100);
                     TaskbarManager.SetProgressState(TaskbarProgressBarState.Normal);
                 }
-                else if (multiple == -2) // Reset
+                else if (multiple == -1) // Reset
                 {
                     SetTitleSuffix();
                     TaskProgressBar.Value = 0;
-                    TaskProgressBar.Foreground = new SolidColorBrush(Color.FromRgb(153, 153, 153));
                     TaskbarManager.SetProgressValue(0, 100);
                     TaskbarManager.SetProgressState(TaskbarProgressBarState.NoProgress);
                 }
@@ -119,56 +115,23 @@ namespace UniversalGUI
         private void SetTitleSuffix(string suffix = "")
         {
             Title = suffix == ""
-                ? DefaultTitle
-                : DefaultTitle + " - " + suffix;
+                ? UiData.DefaultTitle
+                : UiData.DefaultTitle + " - " + suffix;
         }
 
         private async void StartMonitorAsync()
         {
-            var cpuPerformanceCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            cpuPerformanceCounter.NextValue();
-            double cpuUseRatio;
-            var computerInfo = new Microsoft.VisualBasic.Devices.ComputerInfo();
-            double usedRam;
-            string ramUnit = "KB";
-            double ramUseRatio;
+            var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            var ramInUseCounter = new PerformanceCounter("Process", "Working Set", "_Total");
+            var ramAvailableCounter = new PerformanceCounter("Memory", "Available Bytes");
+            float ramTotal;
+            float ramInUse;
             while (true)
             {
-                cpuUseRatio = Math.Round(cpuPerformanceCounter.NextValue());
-                usedRam = (double)computerInfo.TotalPhysicalMemory - computerInfo.AvailablePhysicalMemory;
-                ramUseRatio = Math.Round(usedRam / computerInfo.TotalPhysicalMemory * 100);
-                if (usedRam >= 1099511627776) //1TB
-                {
-                    ramUnit = "TB";
-                    usedRam /= 1099511627776; //1024^4
-                    usedRam = Math.Round(usedRam, 2);
-                }
-                else if (usedRam >= 107374182400) //100GB
-                {
-                    ramUnit = "GB";
-                    usedRam /= 1073741824; //1024^3
-                    usedRam = Math.Round(usedRam, 0);
-                }
-                else if (usedRam >= 10737418240) //10GB
-                {
-                    ramUnit = "GB";
-                    usedRam /= 1073741824; //1024^3
-                    usedRam = Math.Round(usedRam, 1);
-                }
-                else if (usedRam >= 1073741824) //1GB
-                {
-                    ramUnit = "GB";
-                    usedRam /= 1073741824; //1024^3
-                    usedRam = Math.Round(usedRam, 2);
-                }
-                else if (usedRam >= 104857600) //100MB
-                {
-                    ramUnit = "MB";
-                    usedRam /= 1048576; //1024^2
-                    usedRam = Math.Round(usedRam, 0);
-                }
-                UiData.CpuUsage = cpuUseRatio + "%";
-                UiData.RamUsage = usedRam + ramUnit + " (" + ramUseRatio + "%)";
+                ramInUse = ramInUseCounter.NextValue();
+                ramTotal = ramInUse + ramAvailableCounter.NextValue();
+                UiData.CpuUsage = Math.Round(cpuCounter.NextValue()) + "%";
+                UiData.RamUsage = Math.Round(ramInUse / ramTotal * 100) + "%";
                 await Task.Delay(1000);
             }
         }
@@ -204,7 +167,7 @@ namespace UniversalGUI
                     return false;
                 }
             }
-            else if (UiData.ThreadCount == 0 || CustomThreadCountTextBox.Text == "")
+            else if (UiData.ThreadCount == 0 || (CustomThreadCountItem.IsSelected && CustomThreadCountTextBox.Text == ""))
             {
                 MessageBox.Show(
                     QueryLangDict("Message_ThreadNumberIsIllegal"),
@@ -212,7 +175,7 @@ namespace UniversalGUI
                 );
                 return false;
             }
-            else if (UiData.SimulateCmd == 2 && AppPath.Text.IndexOf(' ') != -1)
+            else if (UiData.SimulateCmd == 2 && UiData.AppPath.IndexOf(' ') != -1)
             {
                 MessageBox.Show(
                     QueryLangDict("Message_SimulateCmdIsIllegal"),
@@ -283,7 +246,7 @@ namespace UniversalGUI
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                AppPath.Text = openFileDialog.FileName;
+                UiData.AppPath = openFileDialog.FileName;
             }
         }
 
@@ -324,7 +287,7 @@ namespace UniversalGUI
             var folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             if (folderBrowser.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                OutputFloder.Text = folderBrowser.SelectedPath;
+                UiData.OutputFloder = folderBrowser.SelectedPath;
             }
         }
 
@@ -499,6 +462,8 @@ namespace UniversalGUI
             }
         }
 
+        public string DefaultTitle;
+
         private string _appPath;
         public string AppPath
         {
@@ -594,7 +559,7 @@ namespace UniversalGUI
             set { _cpuUsage = value; NotifyValueChanged("CpuUsage"); }
         }
 
-        private string _ramUsage = "--GB (--%)";
+        private string _ramUsage = "--%";
         public string RamUsage
         {
             get => _ramUsage;

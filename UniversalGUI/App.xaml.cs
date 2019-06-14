@@ -86,87 +86,43 @@ namespace UniversalGUI
             }
         }
 
-        private void RemoveQuotationMasks(ref string sourceString)
-        {
-            sourceString = new Regex("(^\")|(\"$)").Replace(sourceString, "");
-        }
-
-        private void AddQuotationMasks(ref string sourceString)
-        {
-            sourceString = "\"" + sourceString + "\"";
-        }
-
         private string SumAppArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
-            // Remove quotation mask
-            RemoveQuotationMasks(ref inputFile);
-            RemoveQuotationMasks(ref argsTemplet);
-            RemoveQuotationMasks(ref outputSuffix);
-            RemoveQuotationMasks(ref outputExtension);
-            RemoveQuotationMasks(ref outputFloder);
-
+            RegexUtility.RemoveQuotationMasks(ref inputFile);
+            RegexUtility.RemoveQuotationMasks(ref argsTemplet);
+            RegexUtility.RemoveQuotationMasks(ref outputSuffix);
+            RegexUtility.RemoveQuotationMasks(ref outputExtension);
+            RegexUtility.RemoveQuotationMasks(ref outputFloder);
             string args = argsTemplet;
-
             //{UserArgs}
             {
-                //替换模板中的标记
-                args = new Regex(@"\{UserArgs\}").Replace(args, userArgs);
+                args = new Regex("{UserArgs}").Replace(args, userArgs);
             }
-
             //{InputFile}
             {
-                //加前后引号
-                string inputFile2 = "\"" + inputFile + "\"";
-                //替换模板中的标记
-                args = new Regex(@"\{InputFile\}").Replace(args, inputFile2);
+                args = new Regex("{InputFile}").Replace(args, RegexUtility.AddQuotationMasks(inputFile));
             }
-
             //{OutputFile}
             {
                 string outputFile;
-                //获得主文件名
                 string mainName = new Regex(@"\..[^.]+?$").Replace(inputFile, "");
-
-                //后缀
-                if (outputSuffix != "")
-                {
-                    mainName += outputSuffix;
-                }
-
-                //拓展名
-                string extension;
-                if (outputExtension != "")
-                {
-                    //新拓展名
-                    extension = outputExtension;
-                }
-                else
-                {
-                    //原拓展名
-                    extension = new Regex(@"\..[^.]+?$").Match(inputFile).ToString();
-                }
-                //去除拓展名前的点
-                extension = new Regex(@"\.").Replace(extension, "");
-                //组合
+                mainName += outputSuffix;
+                string extension = outputExtension == ""
+                    ? new Regex(@"\..[^.]+?$").Match(inputFile).ToString() //Source extension
+                    : new Regex(@"\.").Replace(outputExtension, ""); //Remove dot before the extension
                 outputFile = mainName + "." + extension;
-
-                //输出文件夹
                 if (outputFloder != "")
                 {
-                    //去路径后正反斜杠
+                    //Remove "/" or "\"
                     outputFloder = new Regex(@"[\\/]$").Replace(outputFloder, "");
-                    //加路径后反斜杠
-                    outputFloder += "\\";
-                    //替换输出路径
+                    //Add "\"
+                    outputFloder += @"\";
+                    //Replace the output path
                     outputFile = new Regex(@"^.+\\").Replace(outputFile, outputFloder);
                 }
-
-                //加前后引号
-                AddQuotationMasks(ref outputFile);
-                //替换模板中的标记
-                args = new Regex(@"\{OutputFile\}").Replace(args, outputFile);
+                RegexUtility.AddQuotationMasks(ref outputFile);
+                args = new Regex("{OutputFile}").Replace(args, outputFile);
             }
-
             return args;
         }
 

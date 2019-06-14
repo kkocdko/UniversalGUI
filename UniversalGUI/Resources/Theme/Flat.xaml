@@ -62,14 +62,14 @@
 
     <!-- ComboBox -->
     <SolidColorBrush x:Key="ComboBox.Static.Glyph" Color="#999"/>
-    <SolidColorBrush x:Key="ComboBox.Static.Background" Color="#fff"/>
+    <SolidColorBrush x:Key="ComboBox.Static.Background" Color="#FFF"/>
     <SolidColorBrush x:Key="ComboBox.Static.Border" Color="#999"/>
     <SolidColorBrush x:Key="ComboBox.MouseOver.Border" Color="#666"/>
     <SolidColorBrush x:Key="ComboBox.Checked.Border" Color="#666"/>
-    <SolidColorBrush x:Key="ComboBox.Disabled.Background" Color="#eee"/>
-    <SolidColorBrush x:Key="ComboBox.Disabled.Border" Color="#eee"/>
+    <SolidColorBrush x:Key="ComboBox.Disabled.Background" Color="#EEE"/>
+    <SolidColorBrush x:Key="ComboBox.Disabled.Border" Color="#EEE"/>
     <SolidColorBrush x:Key="ComboBox.Disabled.Foreground" Color="#838383"/>
-    <SolidColorBrush x:Key="TextBox.Static.Background" Color="#fff"/>
+    <SolidColorBrush x:Key="TextBox.Static.Background" Color="#FFF"/>
     <Style x:Key="ComboBoxToggleButton" TargetType="{x:Type ToggleButton}">
         <Setter Property="OverridesDefaultStyle" Value="true"/>
         <Setter Property="IsTabStop" Value="false"/>
@@ -231,7 +231,7 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
         <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-        <Setter Property="Padding" Value="6, 3, 5, 3"/>
+        <Setter Property="Padding" Value="6,3,5,3"/>
         <Setter Property="ScrollViewer.CanContentScroll" Value="true"/>
         <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
         <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
@@ -248,8 +248,8 @@
         </Style.Triggers>
     </Style>
 
-    <!-- TextBoxButton -->
-    <Style x:Key="TextBoxButton" TargetType="{x:Type Button}">
+    <!-- ButtonBehindTextBox -->
+    <Style x:Key="ButtonBehindTextBox" TargetType="{x:Type Button}">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
         <Setter Property="Background" Value="{StaticResource Button.Static.Background}"/>
         <Setter Property="BorderBrush" Value="{StaticResource Button.Static.Border}"/>
@@ -262,7 +262,7 @@
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid x:Name="grid" SnapsToDevicePixels="true">
                         <Border x:Name="leftBorder" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1,0,0,0" />
-                        <Border x:Name="otherBorder" BorderBrush="Transparent" BorderThickness="1" Background="{TemplateBinding Background}"/>
+                        <Border x:Name="otherBorder" BorderBrush="{x:Null}" BorderThickness="1" Background="{TemplateBinding Background}"/>
                         <ContentPresenter x:Name="contentPresenter" Focusable="False" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -288,4 +288,35 @@
         </Setter>
     </Style>
 
+    <!-- TextBoxInComboBox -->
+    <Style x:Key="TextBoxInComboBox" TargetType="{x:Type TextBox}">
+        <Setter Property="Background" Value="#FFF"/>
+        <Setter Property="BorderBrush" Value="{x:Null}"/>
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="KeyboardNavigation.TabNavigation" Value="None"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="AllowDrop" Value="true"/>
+        <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst"/>
+        <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBox}">
+                    <Border x:Name="border" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="{StaticResource ComboBox.Disabled.Foreground}"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="true">
+                            <Setter Property="BorderBrush" TargetName="border" Value="#FF569DE5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

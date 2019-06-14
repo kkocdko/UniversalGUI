@@ -2,7 +2,7 @@
 
 ![001](https://kkocdko.github.io/src/img/20180726-010059-001.webp)
 
-* 此为`0.7.1.1`版本的截图。
+* 此为`1.0.1.1`版本的截图。
 
 #### What does it do?
 

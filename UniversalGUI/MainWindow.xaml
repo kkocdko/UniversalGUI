@@ -6,18 +6,18 @@
     xmlns:local="clr-namespace:UniversalGUI"
     x:Class="UniversalGUI.MainWindow"
     mc:Ignorable="d"
-    Title="{DynamicResource Window_MainWindow_Title}" Height="430" Width="650" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded">
+    Title="{DynamicResource Window_MainWindow_Title}" Width="650" Height="430" MinWidth="550" MinHeight="425" Closing="MainWindow_WindowClosing" Loaded="MainWindow_Loaded">
 
     <Window.DataContext>
         <local:MainWindowData/>
     </Window.DataContext>
 
-    <Grid Margin="15">
+    <Grid Margin="15,10,15,15">
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="10"/>
-            <ColumnDefinition Width="130"/>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="105"/>
+            <ColumnDefinition Width="110"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="7*"/>
@@ -64,20 +64,20 @@
                 </Grid.Resources>
 
                 <Label Grid.Column="0" Grid.Row="0" Content="{DynamicResource Label_AppPath}"/>
-                <TextBox Grid.Column="0" Grid.Row="2" x:Name="AppPath" Text="{Binding AppPath}" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop"/>
-                <Button Grid.Column="0" Grid.Row="2" Content="..." Width="20" HorizontalAlignment="Right" Style="{StaticResource TextBoxButton}" Click="SwitchAppPath"/>
+                <TextBox Grid.Column="0" Grid.Row="2" Text="{Binding AppPath}" Padding="0,0,20,0" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop"/>
+                <Button Grid.Column="0" Grid.Row="2" Content="..." Width="20" HorizontalAlignment="Right" Style="{StaticResource ButtonBehindTextBox}" Click="SwitchAppPath"/>
 
                 <Label Grid.Column="0" Grid.Row="4" Content="{DynamicResource Label_ArgsTemplet}"/>
-                <TextBox Grid.Column="0" Grid.Row="6" x:Name="ArgsTemplet" Text="{Binding ArgsTemplet}"/>
-                <Button Grid.Column="0" Grid.Row="6" Content="＞" Width="20" HorizontalAlignment="Right" Style="{StaticResource TextBoxButton}"/>
-                <Menu Grid.Column="0" Grid.Row="6" HorizontalAlignment="Right" Width="20" Height="20" Opacity="0">
+                <TextBox Grid.Column="0" Grid.Row="6" x:Name="ArgsTemplet" Text="{Binding ArgsTemplet}" Padding="0,0,20,0"/>
+                <Button Grid.Column="0" Grid.Row="6" Content="＞" Width="20" HorizontalAlignment="Right" Style="{StaticResource ButtonBehindTextBox}"/>
+                <Menu Grid.Column="0" Grid.Row="6" HorizontalAlignment="Right" Opacity="0">
                     <MenuItem Width="20" Height="20">
-                        <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_InsertMark}" Foreground="Black">
+                        <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_InsertMark}">
                             <MenuItem Header="{}{UserArgs}" Click="InsertArgsTempletMark"/>
                             <MenuItem Header="{}{InputFile}" Click="InsertArgsTempletMark"/>
                             <MenuItem Header="{}{OutputFile}" Click="InsertArgsTempletMark"/>
                         </MenuItem>
-                        <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_Help}" Click="ShowArgsTempletHelp" Foreground="Black"/>
+                        <MenuItem Header="{DynamicResource MenuItem_ArgsTemplet_Help}" Click="ShowArgsTempletHelp"/>
                     </MenuItem>
                 </Menu>
 
@@ -118,8 +118,8 @@
                 <TextBox Grid.Column="2" Grid.Row="2" Text="{Binding OutputSuffix}" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown" GotFocus="AutoSelectTextBox_GotFocus"/>
 
                 <Label Grid.Column="0" Grid.Row="4" Content="{DynamicResource Label_OutputFloder}"/>
-                <TextBox Grid.Column="2" Grid.Row="4" x:Name="OutputFloder" Text="{Binding OutputFloder}" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop" GotFocus="AutoSelectTextBox_GotFocus" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown" Padding="0,0,20,0"/>
-                <Button Grid.Column="2" Grid.Row="4" Content="..." HorizontalAlignment="Right" Width="20" Style="{StaticResource TextBoxButton}" Click="SwitchOutputFloder"/>
+                <TextBox Grid.Column="2" Grid.Row="4" Text="{Binding OutputFloder}" Padding="0,0,20,0" PreviewDragOver="DropFileTextBox_PreviewDragOver" PreviewDrop="DropFileTextBox_PreviewDrop" GotFocus="AutoSelectTextBox_GotFocus" PreviewMouseDown="AutoSelectTextBox_PreviewMouseDown"/>
+                <Button Grid.Column="2" Grid.Row="4" Content="..." HorizontalAlignment="Right" Width="20" Style="{StaticResource ButtonBehindTextBox}" Click="SwitchOutputFloder"/>
 
                 <Label Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" Content="{DynamicResource Label_OutputConfigTips}" Foreground="#FF707070" FontSize="10"/>
             </Grid>
@@ -161,7 +161,7 @@
                 </ComboBox>
 
                 <Label Grid.Column="0" Grid.Row="2" Content="{DynamicResource Label_ThreadCount}"/>
-                <ComboBox Grid.Column="2" Grid.Row="2" x:Name="ThreadCount" SelectedValue="{Binding ThreadCount}" SelectedValuePath="Tag">
+                <ComboBox Grid.Column="2" Grid.Row="2" SelectedValue="{Binding ThreadCount}" SelectedValuePath="Tag">
                     <ComboBoxItem Tag="1" Content="1" IsSelected="True"/>
                     <ComboBoxItem Tag="2" Content="2"/>
                     <ComboBoxItem Tag="3" Content="3"/>
@@ -171,7 +171,7 @@
                     <ComboBoxItem Tag="7" Content="7"/>
                     <ComboBoxItem Tag="8" Content="8"/>
                     <ComboBoxItem x:Name="CustomThreadCountItem">
-                        <TextBox x:Name="CustomThreadCountTextBox" MinWidth="40" Margin="-2,0" Padding="-1" BorderBrush="{x:Null}" LostFocus="CustomThreadCountTextBox_LostFocus" TextChanged="CustomThreadCountTextBox_TextChanged"/>
+                        <TextBox x:Name="CustomThreadCountTextBox" IsEnabled="{Binding ConfigVariable}" MinWidth="40" Margin="-2,0" Padding="-1" Style="{DynamicResource TextBoxInComboBox}" LostFocus="CustomThreadCountTextBox_LostFocus" TextChanged="CustomThreadCountTextBox_TextChanged"/>
                     </ComboBoxItem>
                 </ComboBox>
 
@@ -192,11 +192,11 @@
         </GroupBox>
 
         <GroupBox Grid.Column="2" Grid.Row="4" Header="{DynamicResource GroupBox_Monitor}">
-            <Grid Margin="0,3">
+            <Grid Margin="0,2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="4*"/>
                     <ColumnDefinition Width="3"/>
-                    <ColumnDefinition Width="7*"/>
+                    <ColumnDefinition Width="5*"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition/>
@@ -221,7 +221,7 @@
 
         <Grid Grid.Column="4" Grid.Row="4" Margin="11,9,0,1">
             <Button x:Name="StartTaskButton" FontSize="16" Padding="0" Content="{DynamicResource Button_StartTask_Start}" Click="StartTaskButton_Click"/>
-            <ProgressBar x:Name="TaskProgressBar" Height="5" Margin="1" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="#FFDD0000" VerticalAlignment="Bottom" Visibility="{Binding TaskRunning}"/>
+            <ProgressBar x:Name="TaskProgressBar" Height="5" Margin="1" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="#FF999999" VerticalAlignment="Bottom" Visibility="{Binding TaskRunning}"/>
         </Grid>
     </Grid>
 </Window>
