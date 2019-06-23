@@ -22,7 +22,7 @@ namespace UniversalGUI
             this.DataContext = UiData = new MainWindowData();
             UiData.DefaultTitle = this.Title;
             IniConfigManager = new IniManager(GetIniConfigFile());
-            ImputIniConfig(IniConfigManager);
+            ImportIniConfig(IniConfigManager);
             SetLanguage();
         }
 
@@ -33,7 +33,7 @@ namespace UniversalGUI
             Task.Run(StartMonitorAsync);
         }
 
-        private void MainWindow_WindowClosing(object sender, CancelEventArgs e)
+        private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             StopTask();
             StartTaskButton.Focus(); //Ensure that the binding data are saved
@@ -350,7 +350,7 @@ namespace UniversalGUI
             return IniConfigFile;
         }
 
-        private void ImputIniConfig(IniManager ini)
+        private void ImportIniConfig(IniManager ini)
         {
             if (!File.Exists(ini.IniFilePath) || File.ReadAllBytes(ini.IniFilePath).Length == 0)
             {
@@ -454,12 +454,9 @@ namespace UniversalGUI
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void NotifyValueChanged(string argName)
+        private void NotifyPropertyChanged(string propertyName)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs(argName));
-            }
+            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         public string DefaultTitle;
@@ -468,70 +465,70 @@ namespace UniversalGUI
         public string AppPath
         {
             get => _appPath;
-            set { _appPath = value; NotifyValueChanged("AppPath"); }
+            set { _appPath = value; NotifyPropertyChanged("AppPath"); }
         }
 
         private string _argsTemplet;
         public string ArgsTemplet
         {
             get => _argsTemplet;
-            set { _argsTemplet = value; NotifyValueChanged("ArgsTemplet"); }
+            set { _argsTemplet = value; NotifyPropertyChanged("ArgsTemplet"); }
         }
 
         private string _userArgs;
         public string UserArgs
         {
             get => _userArgs;
-            set { _userArgs = value; NotifyValueChanged("UserArgs"); }
+            set { _userArgs = value; NotifyPropertyChanged("UserArgs"); }
         }
 
         private string _outputSuffix = "_Output";
         public string OutputSuffix
         {
             get => _outputSuffix;
-            set { _outputSuffix = value; NotifyValueChanged("OutputSuffix"); }
+            set { _outputSuffix = value; NotifyPropertyChanged("OutputSuffix"); }
         }
 
         private string _outputExtension;
         public string OutputExtension
         {
             get => _outputExtension;
-            set { _outputExtension = value; NotifyValueChanged("OutputExtension"); }
+            set { _outputExtension = value; NotifyPropertyChanged("OutputExtension"); }
         }
 
         private string _outputFloder;
         public string OutputFloder
         {
             get => _outputFloder;
-            set { _outputFloder = value; NotifyValueChanged("OutputFloder"); }
+            set { _outputFloder = value; NotifyPropertyChanged("OutputFloder"); }
         }
 
-        private int _priority;
+        private int _priority = 3;
         public int Priority
         {
             get => _priority;
-            set { _priority = value; NotifyValueChanged("Priority"); }
+            set { _priority = value; NotifyPropertyChanged("Priority"); }
         }
 
-        private int _threadCount;
+        private int _threadCount = 1;
         public int ThreadCount
         {
             get => _threadCount;
-            set { _threadCount = value; NotifyValueChanged("ThreadCount"); }
+            set { _threadCount = value; NotifyPropertyChanged("ThreadCount"); }
         }
 
-        private int _windowStyle;
+        private int _windowStyle = 1;
         public int WindowStyle
         {
             get => _windowStyle;
-            set { _windowStyle = value; NotifyValueChanged("WindowStyle"); }
+            set { _windowStyle = value; NotifyPropertyChanged("WindowStyle"); }
         }
 
-        private int _simulateCmd;
+        private int _simulateCmd = 1;
         public int SimulateCmd
         {
             get => _simulateCmd;
-            set { _simulateCmd = value; NotifyValueChanged("SimulateCmd"); }
+            set { _simulateCmd = value; NotifyPropertyChanged("SimulateCmd"); }
         }
 
         private bool _taskRunning = false;
@@ -542,28 +539,28 @@ namespace UniversalGUI
             {
                 _taskRunning = value;
                 ConfigVariable = !value;
-                NotifyValueChanged("TaskRunning");
+                NotifyPropertyChanged("TaskRunning");
             }
         }
 
         public bool ConfigVariable
         {
             get => !TaskRunning;
-            set => NotifyValueChanged("ConfigVariable"); // Throw set value
+            set => NotifyPropertyChanged("ConfigVariable"); // Throw set value
         }
 
         private string _cpuUsage = "--%";
         public string CpuUsage
         {
             get => _cpuUsage;
-            set { _cpuUsage = value; NotifyValueChanged("CpuUsage"); }
+            set { _cpuUsage = value; NotifyPropertyChanged("CpuUsage"); }
         }
 
         private string _ramUsage = "--%";
         public string RamUsage
         {
             get => _ramUsage;
-            set { _ramUsage = value; NotifyValueChanged("RamUsage"); }
+            set { _ramUsage = value; NotifyPropertyChanged("RamUsage"); }
         }
     }
 }

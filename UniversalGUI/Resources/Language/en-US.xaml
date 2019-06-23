@@ -12,7 +12,7 @@
     <sys:String x:Key="Button_StartTask_Stop">Stop</sys:String>
     <sys:String x:Key="Button_StartTask_Error">Error</sys:String>
     <sys:String x:Key="Button_StartTask_Finished">Finished</sys:String>
-    <sys:String x:Key="GroupBox_ImputFiles">Imput files</sys:String>
+    <sys:String x:Key="GroupBox_InputFiles">Input files</sys:String>
     <sys:String x:Key="Button_AddFiles">Add</sys:String>
     <sys:String x:Key="Button_RemoveFiles">Remove</sys:String>
     <sys:String x:Key="Button_EmptyFiles">Empty</sys:String>

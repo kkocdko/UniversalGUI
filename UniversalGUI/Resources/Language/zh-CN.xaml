@@ -12,7 +12,7 @@
     <sys:String x:Key="Button_StartTask_Stop">停止</sys:String>
     <sys:String x:Key="Button_StartTask_Error">错误</sys:String>
     <sys:String x:Key="Button_StartTask_Finished">已完成</sys:String>
-    <sys:String x:Key="GroupBox_ImputFiles">输入文件</sys:String>
+    <sys:String x:Key="GroupBox_InputFiles">输入文件</sys:String>
     <sys:String x:Key="Button_AddFiles">添加</sys:String>
     <sys:String x:Key="Button_RemoveFiles">移除</sys:String>
     <sys:String x:Key="Button_EmptyFiles">清空</sys:String>
