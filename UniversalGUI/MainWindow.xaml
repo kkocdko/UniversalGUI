@@ -8,6 +8,9 @@
     mc:Ignorable="d"
     Title="{DynamicResource Window_MainWindow_Title}" Width="650" Height="430" MinWidth="550" MinHeight="425" Loaded="MainWindow_Loaded" Closing="MainWindow_Closing">
 
+    <!-- 在标题栏上加一个设置按钮 -->
+    <!-- 修改标题栏图标右键菜单，添加一些有的没的 -->
+    
     <Window.DataContext>
         <local:MainWindowData/>
     </Window.DataContext>
@@ -187,6 +190,7 @@
                 <ComboBox Grid.Column="2" Grid.Row="6" SelectedValue="{Binding SimulateCmd}" SelectedValuePath="Tag">
                     <ComboBoxItem Tag="1" Content="{DynamicResource ComboBoxItem_Disabled}"/>
                     <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_Enabled}"/>
+                    <ComboBoxItem Tag="2" Content="{DynamicResource ComboBoxItem_OutputLog}"/>
                 </ComboBox>
             </Grid>
         </GroupBox>

@@ -44,6 +44,7 @@
     <sys:String x:Key="Label_SimulateCmd">Simulate cmd:</sys:String>
     <sys:String x:Key="ComboBoxItem_Disabled">Disabled</sys:String>
     <sys:String x:Key="ComboBoxItem_Enabled">Enabled</sys:String>
+    <sys:String x:Key="ComboBoxItem_OutputLog">Derived log(Enabled)</sys:String>
     <sys:String x:Key="GroupBox_Monitor">Monitor</sys:String>
     <sys:String x:Key="Label_CpuMonitor">CPU:</sys:String>
     <sys:String x:Key="Label_RamMonitor">RAM:</sys:String>

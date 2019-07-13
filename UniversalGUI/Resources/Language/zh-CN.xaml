@@ -44,6 +44,7 @@
     <sys:String x:Key="Label_SimulateCmd">模拟cmd:</sys:String>
     <sys:String x:Key="ComboBoxItem_Disabled">已禁用</sys:String>
     <sys:String x:Key="ComboBoxItem_Enabled">已启用</sys:String>
+    <sys:String x:Key="ComboBoxItem_OutputLog">导出日志(启用)</sys:String>
     <sys:String x:Key="GroupBox_Monitor">资源监视</sys:String>
     <sys:String x:Key="Label_CpuMonitor">处理器:</sys:String>
     <sys:String x:Key="Label_RamMonitor">内存:</sys:String>

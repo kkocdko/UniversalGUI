@@ -61,10 +61,7 @@ namespace UniversalGUI
             while (true)
             {
                 string currentFile = taskFiles.Current;
-                if (currentFile == null)
-                {
-                    break;
-                }
+                if (currentFile == null) break;
                 string appArgs = SumAppArgs(
                     argsTemplet: UiData.ArgsTemplet,
                     inputFile: currentFile,
@@ -80,6 +77,7 @@ namespace UniversalGUI
                     priority: UiData.Priority,
                     simulateCmd: UiData.SimulateCmd
                 );
+                if (process == null) break;
                 processIds[threadIndex] = process.Id;
                 await Task.Run(process.WaitForExit);
                 SetProgress(taskFiles.CompletionRate);
@@ -88,27 +86,32 @@ namespace UniversalGUI
 
         private string SumAppArgs(string argsTemplet, string inputFile, string userArgs, string outputSuffix, string outputExtension, string outputFloder)
         {
-            RegexUtility.RemoveQuotationMasks(ref inputFile);
-            RegexUtility.RemoveQuotationMasks(ref argsTemplet);
-            RegexUtility.RemoveQuotationMasks(ref outputSuffix);
-            RegexUtility.RemoveQuotationMasks(ref outputExtension);
-            RegexUtility.RemoveQuotationMasks(ref outputFloder);
+            var regexQuotations = new Regex("(^\")|(\"$)");
+            var removeQuotations = new Func<string, string>(str => regexQuotations.Replace(str, ""));
+            var addQuotations = new Func<string, string>(str => "\"" + str + "\"");
+
+            inputFile = removeQuotations(inputFile);
+            argsTemplet = removeQuotations(argsTemplet);
+            outputSuffix = removeQuotations(outputSuffix);
+            outputExtension = removeQuotations(outputExtension);
+            outputFloder = removeQuotations(outputFloder);
+
             string args = argsTemplet;
-            //{UserArgs}
-            {
+
+            { //{UserArgs}
                 args = new Regex("{UserArgs}").Replace(args, userArgs);
             }
-            //{InputFile}
-            {
-                args = new Regex("{InputFile}").Replace(args, RegexUtility.AddQuotationMasks(inputFile));
+
+            { //{InputFile}
+                args = new Regex("{InputFile}").Replace(args, addQuotations(inputFile));
             }
-            //{OutputFile}
-            {
+
+            { //{OutputFile}
                 string outputFile;
-                string mainName = new Regex(@"\..[^.]+?$").Replace(inputFile, "");
+                string mainName = new Regex(@"^.+(?=\..+?$)").Match(inputFile).ToString();
                 mainName += outputSuffix;
                 string extension = outputExtension == ""
-                    ? new Regex(@"\..[^.]+?$").Match(inputFile).ToString() //Source extension
+                    ? new Regex(@"[^\.]+$").Match(inputFile).ToString() //Source extension
                     : new Regex(@"\.").Replace(outputExtension, ""); //Remove dot before the extension
                 outputFile = mainName + "." + extension;
                 if (outputFloder != "")
@@ -120,25 +123,34 @@ namespace UniversalGUI
                     //Replace the output path
                     outputFile = new Regex(@"^.+\\").Replace(outputFile, outputFloder);
                 }
-                RegexUtility.AddQuotationMasks(ref outputFile);
+                outputFile = addQuotations(outputFile);
                 args = new Regex("{OutputFile}").Replace(args, outputFile);
             }
+            Debug.WriteLine(args);
             return args;
         }
 
         private Process CreateProcess(string appPath, string appArgs, int windowStyle, int priority, int simulateCmd)
         {
             var process = new Process();
-            if (simulateCmd == 1)
+            switch (simulateCmd)
             {
-                process.StartInfo.FileName = appPath;
-                process.StartInfo.Arguments = appArgs;
+                case 1:
+                    process.StartInfo.FileName = appPath;
+                    process.StartInfo.Arguments = appArgs;
+                    break;
+                case 2:
+                case 3:
+                    process.StartInfo.FileName = "cmd.exe";
+                    process.StartInfo.Arguments = "/c " + appPath + " " + appArgs; // Shouldn't add quotations
+                    break;
+                    //case 3:
+                    //    process.StartInfo.FileName = "cmd.exe";
+                    //    process.StartInfo.Arguments = "/c " + appPath + " " + appArgs;
+                    //    // 获取输出流，写入到日志中
+                    //    break;
             }
-            else
-            {
-                process.StartInfo.FileName = "cmd.exe";
-                process.StartInfo.Arguments = "/c " + appPath + " " + appArgs; // 这边不能给appPath加引号
-            }
+
             switch (windowStyle)
             {
                 case 1:
